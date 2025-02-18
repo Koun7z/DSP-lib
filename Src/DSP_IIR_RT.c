@@ -1,14 +1,17 @@
-//
-// Created by pwoli on 17.02.2025.
-//
+/*
+ * DSP_IIR_RT.C
+ *
+ *  Created on: Feb 18, 2025
+ *      Author: Piotr Woliński
+ */
 
 #include "SignalFiltering.h"
 
 
-void DSP_IIR_RT_f32_Init(DSP_IIR_RT_f32_Instance* filter,
+void DSP_IIR_RT_Init_f32(DSP_IIR_RT_Instance_f32* filter,
                          size_t filterOrder,
-                         float* filterCoeffsNumerator,
-                         float* filterCoeffsDenominator,
+                         const float* filterCoeffsNumerator,
+                         const float* filterCoeffsDenominator,
                          float* pastSamplesBuff,
                          float* pastSamplesBuffFiltered)
 {
@@ -27,10 +30,10 @@ void DSP_IIR_RT_f32_Init(DSP_IIR_RT_f32_Instance* filter,
 	filter->_buffPointer = 0;
 }
 
-void DSP_IIR_RT_f64_Init(DSP_IIR_RT_f64_Instance* filter,
+void DSP_IIR_RT_Init_f64(DSP_IIR_RT_Instance_f64* filter,
                          size_t filterOrder,
-                         double* filterCoeffsNumerator,
-                         double* filterCoeffsDenominator,
+                         const double* filterCoeffsNumerator,
+                         const double* filterCoeffsDenominator,
                          double* pastSamplesBuff,
                          double* pastSamplesBuffFiltered)
 {
@@ -49,7 +52,7 @@ void DSP_IIR_RT_f64_Init(DSP_IIR_RT_f64_Instance* filter,
 	filter->_buffPointer = 0;
 }
 
-float DSP_IIR_RT_f32_Update(DSP_IIR_RT_f32_Instance* filter, float input)
+float DSP_IIR_RT_Update_f32(DSP_IIR_RT_Instance_f32* filter, float input)
 {
 	float out = 0.0f;
 
@@ -70,7 +73,7 @@ float DSP_IIR_RT_f32_Update(DSP_IIR_RT_f32_Instance* filter, float input)
 	return out;
 }
 
-double DSP_IIR_RT_f64_Update(DSP_IIR_RT_f64_Instance* filter, double input)
+double DSP_IIR_RT_Update_f64(DSP_IIR_RT_Instance_f64* filter, double input)
 {
 	double out = 0.0;
 
@@ -91,7 +94,7 @@ double DSP_IIR_RT_f64_Update(DSP_IIR_RT_f64_Instance* filter, double input)
 	return out;
 }
 
-void DSP_ReverseArrayf32(float* arr, size_t size)
+void DSP_ReverseArray_f32(float* arr, size_t size)
 {
 	for(size_t i = 0; i < size / 2; i++)
 	{
@@ -101,7 +104,7 @@ void DSP_ReverseArrayf32(float* arr, size_t size)
 	}
 }
 
-void DSP_ReverseArrayf64(double* arr, size_t size)
+void DSP_ReverseArray_f64(double* arr, size_t size)
 {
 	for(size_t i = 0; i < size / 2; i++)
 	{
