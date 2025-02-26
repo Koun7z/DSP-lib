@@ -118,7 +118,7 @@ void PID_Init_f64(PID_Instance_f64* regulator, double Kp, double Ti, double Td);
  * @param[in]   minWindup  minimal allowed integral value
  * @param[in]   maxWindup  maximal allowed integral value
  */
-void PID_SetAntiWindup_f64(PID_Instance_f32* regulator, double minWindup, double maxWindup);
+void PID_SetAntiWindup_f64(PID_Instance_f64* regulator, double minWindup, double maxWindup);
 
 /**
  * @brief		  Calculates PID response based on given input and updates internal regulator state
