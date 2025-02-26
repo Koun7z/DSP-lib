@@ -10,23 +10,23 @@
 #include <stdlib.h>
 #include <math.h>
 
-static float _clampf32(float num, float min, float max)
+static float clamp_f32(float num, float min, float max)
 {
 	const float t = num < min ? min : num;
 	return t > max ? max : t;
 }
 
-static double _clampf64(double num, double min, double max)
+static double clamp_f64(double num, double min, double max)
 {
 	const double t = num < min ? min : num;
 	return t > max ? max : t;
 }
 
-void PID_Init_f32(PID_Instance_f32* regulator, float K, float I, float D)
+void PID_Init_f32(PID_Instance_f32* regulator, float Kp, float Ti, float Td)
 {
-	regulator->K_Gain = K;
-	regulator->I_Gain = I;
-	regulator->D_Gain = D;
+	regulator->K_Gain = Kp;
+	regulator->I_Gain = Ti == 0? 0 : Kp/Ti;
+	regulator->D_Gain = Kp*Td;
 
 	regulator->_integralState = 0.0f;
 	regulator->_previousInput = 0.0f;
@@ -53,7 +53,7 @@ float PID_Update_f32(PID_Instance_f32* regulator, float input, float dt)
 	regulator->_integralState += (input + regulator->_previousInput) * 0.5f * regulator->I_Gain * dt;
 
 #if ANTI_WINDUP_ENABLE
-	regulator->_integralState  = _clampf32(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
+	regulator->_integralState  = clamp_f32(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
 #endif
 
 	// Differential part
@@ -74,7 +74,7 @@ float PID_DTermFIR_Update_f32(PID_Instance_f32* regulator, DSP_FIR_RT_Instance_f
 	regulator->_integralState += (input + regulator->_previousInput) * 0.5f * regulator->I_Gain * dt;
 
 #if ANTI_WINDUP_ENABLE
-	regulator->_integralState = _clampf32(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
+	regulator->_integralState = clamp_f32(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
 #endif
 
 	// Differential part
@@ -98,7 +98,7 @@ float PID_DTermIIR_Update_f32(PID_Instance_f32* regulator, DSP_IIR_RT_Instance_f
 	regulator->_integralState += (input + regulator->_previousInput) * 0.5f * regulator->I_Gain * dt;
 
 #if ANTI_WINDUP_ENABLE
-	regulator->_integralState = _clampf32(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
+	regulator->_integralState = clamp_f32(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
 #endif
 
 	// Differential part
@@ -111,11 +111,11 @@ float PID_DTermIIR_Update_f32(PID_Instance_f32* regulator, DSP_IIR_RT_Instance_f
 	return output;
 }
 
-void PID_Init_f64(PID_Instance_f64* regulator, double K, double I, double D)
+void PID_Init_f64(PID_Instance_f64* regulator, double Kp, double Ti, double Td)
 {
-	regulator->K_Gain = K;
-	regulator->I_Gain = I;
-	regulator->D_Gain = D;
+	regulator->K_Gain = Kp;
+	regulator->I_Gain = Ti == 0? 0 : Kp/Ti;
+	regulator->D_Gain = Kp*Td;
 
 	regulator->_integralState = 0;
 	regulator->_previousInput = 0;
@@ -143,7 +143,7 @@ double PID_Update_f64(PID_Instance_f64* regulator, double input, double dt)
 	regulator->_integralState += (input + regulator->_previousInput) * 0.5 * regulator->I_Gain * dt;
 
 #if ANTI_WINDUP_ENABLE
-	regulator->_integralState = _clampf64(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
+	regulator->_integralState = clamp_f64(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
 #endif
 
 	// Differential part
@@ -164,7 +164,7 @@ double PID_DTermFIR_Update_f64(PID_Instance_f64* regulator, DSP_FIR_RT_Instance_
 	regulator->_integralState += (input + regulator->_previousInput) * 0.5f * regulator->I_Gain * dt;
 
 #if ANTI_WINDUP_ENABLE
-	regulator->_integralState = _clampf64(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
+	regulator->_integralState = clamp_f64(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
 #endif
 
 	// Differential part
@@ -188,7 +188,7 @@ double PID_DTermIIR_Update_f64(PID_Instance_f64* regulator, DSP_IIR_RT_Instance_
 	regulator->_integralState += (input + regulator->_previousInput) * 0.5 * regulator->I_Gain * dt;
 
 #if ANTI_WINDUP_ENABLE
-	regulator->_integralState = _clampf64(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
+	regulator->_integralState = clamp_f64(regulator->_integralState, regulator->MinWindup, regulator->MaxWindup);
 #endif
 
 	// Differential part

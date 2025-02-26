@@ -51,13 +51,14 @@ typedef struct
 } PID_Instance_f64;
 
 /**
- * @brief	    Initializes PID internal structure
+ * @brief	    Initializes PID internal structure.
+ *				The Kp, Ti and Td are parameters of the PID controller in the Standard Form.
  * @param[out] *regulator PID Instance to initialize
- * @param[in]   K		  proportional gain
- * @param[in]   I		  integral gain
- * @param[in]   D		  differential gain
+ * @param[in]   Kp		  proportional gain
+ * @param[in]   Ti		  integration time constant
+ * @param[in]   Td		  differentiation time constant
  */
-void PID_Init_f32(PID_Instance_f32* regulator, float K, float I, float D);
+void PID_Init_f32(PID_Instance_f32* regulator, float Kp, float Ti, float Td);
 
 /**
  * @brief       Sets minimum and maximum values of the internal integral state
@@ -102,13 +103,14 @@ float PID_DTermIIR_Update_f32(PID_Instance_f32* regulator, DSP_IIR_RT_Instance_f
 
 
 /**
- * @brief	    Initializes PID internal structure
+ * @brief	    Initializes PID internal structure.
+ *				The Kp, Ti and Td are parameters of the PID controller in the Standard Form.
  * @param[out] *regulator PID Instance to initialize
- * @param[in]   K		  proportional gain
- * @param[in]   I		  integral gain
- * @param[in]   D		  differential gain
+ * @param[in]   Kp		  proportional gain
+ * @param[in]   Ti		  integration time constant
+ * @param[in]   Td		  differentiation time constant
  */
-void PID_Init_f64(PID_Instance_f64* regulator, double K, double I, double D);
+void PID_Init_f64(PID_Instance_f64* regulator, double Kp, double Ti, double Td);
 
 /**
  * @brief       Sets minimum and maximum values of the internal integral state
