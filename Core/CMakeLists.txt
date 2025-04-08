@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.14)
-cmake_policy(SET CMP0077 NEW)
 project(DSP-lib)
 
 add_library(DSP-lib STATIC)
