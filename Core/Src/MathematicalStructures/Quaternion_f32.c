@@ -7,7 +7,7 @@
 
 #include <math.h>
 
-#define QT_SINGULARITY_THRESHOLD 0.2f
+#define QT_90DEG_SINGULARITY_THRESHOLD 0.2f
 
 void DSP_QT_Add_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q1, const DSP_Quaternion_f32* q2)
 {
@@ -74,27 +74,53 @@ float DSP_QT_Norm_f32(const DSP_Quaternion_f32* q)
 	return sqrtf(q->r * q->r + q->i * q->i + q->j * q->j + q->k * q->k);
 }
 
+void DST_QT_RotateVector_f32(float* dst, const float* v, const DSP_Quaternion_f32* q)
+{
+	const float x = v[0];
+	const float y = v[1];
+	const float z = v[2];
+
+	const float r = q->r;
+	const float i = q->i;
+	const float j = q->j;
+	const float k = q->k;
+
+	const float rr = q->r * q->r;
+	const float ii = q->i * q->i;
+	const float jj = q->j * q->j;
+	const float kk = q->k * q->k;
+
+	dst[0] =
+	  x * ii + 2.0f * y * i * j + 2.0f * z * i * k - x * jj + 2.0f * z * j * r - x * kk - 2.0f * y * k * r + x * rr;
+	dst[1] =
+	  -y * ii + 2.0f * x * i * j - 2.0f * z * i * r + y * jj + 2.0f * z * j * k - y * kk + 2 * x * k * r + y * rr;
+	dst[2] = -z * ii + 2.0f * x * i * k + 2 * y * i * r - z * jj + 2.0f * y * j * k - 2 * x * j * r + z * kk + z * rr;
+}
+
 void DSP_QT_EulerAngles_f32(float* eulerAngles, const DSP_Quaternion_f32* q)
 {
 	const float sing = q->i * q->j + q->k * q->r;
 
-	if(sing > QT_SINGULARITY_THRESHOLD)
+	if(sing > QT_90DEG_SINGULARITY_THRESHOLD)
 	{
 		eulerAngles[2] = 2.0f * atan2f(q->i, q->r);
 		eulerAngles[1] = PI_F32 / 2.0f;
 		eulerAngles[0] = 0.0f;
+		return;
 	}
-	else if(sing < -QT_SINGULARITY_THRESHOLD)
+	if(sing < -QT_90DEG_SINGULARITY_THRESHOLD)
 	{
 		eulerAngles[2] = -2.0f * atan2f(q->i, q->r);
 		eulerAngles[1] = PI_F32 / 2.0f;
 		eulerAngles[0] = 0.0f;
+		return;
 	}
 
-	eulerAngles[0]    = atan2f(2.0f * (q->r * q->i + q->j * q->k), 1 - 2 * (q->i * q->i + q->j * q->j));
 	const float sq_qt = 2.0f * (q->r * q->j - q->i * q->k);
-	eulerAngles[1]    = -PI_F32 / 2.0f + 2.0f * atan2f(sqrtf(1.0f + sq_qt), sqrtf(1.0f - sq_qt));
-	eulerAngles[2]    = atan2f(2.0f * (q->r * q->k + q->i * q->j), 1.0f - 2.0f * (q->j * q->j + q->k * q->k));
+
+	eulerAngles[0] = atan2f(2.0f * (q->r * q->i + q->j * q->k), 1 - 2 * (q->i * q->i + q->j * q->j));
+	eulerAngles[1] = -PI_F32 / 2.0f + 2.0f * atan2f(sqrtf(1.0f + sq_qt), sqrtf(1.0f - sq_qt));
+	eulerAngles[2] = atan2f(2.0f * (q->r * q->k + q->i * q->j), 1.0f - 2.0f * (q->j * q->j + q->k * q->k));
 }
 
 void DSP_QT_EulerToQuaternion_f32(DSP_Quaternion_f32* q, const float* eulerAngles)

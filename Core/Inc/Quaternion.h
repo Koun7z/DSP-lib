@@ -95,11 +95,23 @@ void DSP_QT_Normalize_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q);
 float DSP_QT_Norm_f32(const DSP_Quaternion_f32* q);
 
 /**
+ * @brief		Rotates a 3d vector v by a unit quaternion q.
+ *
+ *			    - Both dst and v are 3 element float arrays
+ *
+ * @param[out] *dst  Rotated output vector
+ * @param[in]  *v    Input vector
+ * @param[in]  *q	 Input unit quaternion
+ */
+void DST_QT_RotateVector_f32(float* dst, const float* v, const DSP_Quaternion_f32* q);
+
+/**
  * @brief	    Converts a unit quaternion, representing a rotation in 3d space
  *				into Euler angles representation in Tait-Bryan convention,
  *				using the body 3-2-1 sequence <=> lab 1-2-3 sequence.
  *
- *				eulerAngles = [Roll (x), Pitch (y), Yaw (z)]
+ *				-eulerAngles is a 3 element float array
+ *				-eulerAngles = [Roll (x), Pitch (y), Yaw (z)]
  *
  * @param[out] *eulerAngles  Roll, Pitch and Yaw as Euler angles in radians
  * @param[in]  *q			 Input unit quaternion representing the rotation
@@ -111,7 +123,8 @@ void DSP_QT_EulerAngles_f32(float* eulerAngles, const DSP_Quaternion_f32* q);
  *				into a unit quatetnion representation using
  *				Body 3-2-1 sequence <=> Lab 1-2-3 sequence
  *
- *				eulerAngles = [Roll (x), Pitch (y), Yaw (z)]
+ *				-eulerAngles is a 3 element float array
+ *				-eulerAngles = [Roll (x), Pitch (y), Yaw (z)]
  *
  * @param[out] *q            Rotation representation in unit quaternion
  * @param[in]  *eulerAngles  Roll, Pitch and Yaw as float array
