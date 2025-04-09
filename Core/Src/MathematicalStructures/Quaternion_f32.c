@@ -74,7 +74,7 @@ float DSP_QT_Norm_f32(const DSP_Quaternion_f32* q)
 	return sqrtf(q->r * q->r + q->i * q->i + q->j * q->j + q->k * q->k);
 }
 
-void DST_QT_RotateVector_f32(float* dst, const float* v, const DSP_Quaternion_f32* q)
+void DSP_QT_RotateVector_f32(float* dst, const float* v, const DSP_Quaternion_f32* q)
 {
 	const float x = v[0];
 	const float y = v[1];

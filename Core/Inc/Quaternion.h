@@ -103,7 +103,7 @@ float DSP_QT_Norm_f32(const DSP_Quaternion_f32* q);
  * @param[in]  *v    Input vector
  * @param[in]  *q	 Input unit quaternion
  */
-void DST_QT_RotateVector_f32(float* dst, const float* v, const DSP_Quaternion_f32* q);
+void DSP_QT_RotateVector_f32(float* dst, const float* v, const DSP_Quaternion_f32* q);
 
 /**
  * @brief	    Converts a unit quaternion, representing a rotation in 3d space
