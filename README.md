@@ -47,9 +47,8 @@ all files needed to build the library are inside the `Core` folder.
 
 To build with CMake add the library as a subdirectory to the CMakeList.txt in your main project.
 If you're using `add_compile_option()` or `add_link_options()` make sure to add them before the `add_subdirectory()`
-file, if you want to use the same options for compiling this library.
-Otherwise, specify compiler and linker flags using `target_compile_options(DSP-lib PRIVATE ${DSP_COMPILE_OPTIONS})`,
-`target_compile_options(DSP-lib PRIVATE ${DSP_LINKER_OPTIONS})`.
+call, if you want to use the same options for compiling this library.
+Otherwise, specify compiler and linker flags using `target_compile_options()`/`target_link_options()`.
 
 ```cmake
 #Example CMakeLists file
