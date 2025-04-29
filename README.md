@@ -1,4 +1,4 @@
-# Digital Signal Procesing Library
+# Digital Signal Processing Library
 
 A multiplatform C library implementing commonly used digital signal processing algorithms and other more complex
 mathematical functions.
@@ -17,7 +17,10 @@ though it's not specifically optimised for that).
         - [ ] For converting blocks of samples
     - [ ] Fourier Transform
 - Process Control:
-    - [x] PID controller _(if some implementations change this one will be first)_
+    - [x] PID controller
+      - D-term filter
+      - Output saturation + anti-windup
+      - Partial set point gains for K and D parts
 - Other math algorithms:
     - [x] Quaternion math
     - [ ] Complex numbers math
