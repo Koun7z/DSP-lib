@@ -88,7 +88,7 @@ void DSP_SimplePID_Init_f32(DSP_SimplePID_Instance_f32* regulator, float Kp, flo
  * @param[in]     dt         sampling period (time between two update calls)
  * @return 	      float      PID output
  */
-float DPS_SimplePID_Update_f32(DSP_SimplePID_Instance_f32* regulator, float err);
+float DSP_SimplePID_Update_f32(DSP_SimplePID_Instance_f32* regulator, float err);
 
 /**
  * @brief	    Initializes internal PID structure.
