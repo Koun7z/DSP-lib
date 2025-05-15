@@ -148,7 +148,7 @@ void DSP_PID_SetSaturation_f32(DSP_PID_Instance_f32* regulator, float min, float
  * @param[in]	N		  D-term filter constant
  * @param[in]   Ts		  Fixed sampling time
  */
-void DSP_PID_Init_f64(DSP_PID_Instance_f32* regulator, double Kp, double Ti, double Td, double N, double Ts);
+void DSP_PID_Init_f64(DSP_PID_Instance_f64* regulator, double Kp, double Ti, double Td, double N, double Ts);
 
 /**
  * @brief		  Calculates PID response based on given input and updates internal regulator state
@@ -157,7 +157,7 @@ void DSP_PID_Init_f64(DSP_PID_Instance_f32* regulator, double Kp, double Ti, dou
  * @param[in]     processValue  Value of controlled process output
  * @return 	      float         PID output
  */
-double DSP_PID_Update_f64(DSP_PID_Instance_f32* regulator, double setPoint, double processValue);
+double DSP_PID_Update_f64(DSP_PID_Instance_f64* regulator, double setPoint, double processValue);
 
 /**
  * @brief	    Updates PID parameters without resetting the internal state.
@@ -169,7 +169,7 @@ double DSP_PID_Update_f64(DSP_PID_Instance_f32* regulator, double setPoint, doub
  * @param[in]	N		   D-term filter constant
  * @param[in]   Ts		   Fixed sampling time
  */
-void DSP_PID_SetGains_f64(DSP_PID_Instance_f32* regulator, double Kp, double, double Td, double N, double Ts);
+void DSP_PID_SetGains_f64(DSP_PID_Instance_f64* regulator, double Kp, double, double Td, double N, double Ts);
 
 /**
  * @brief       Sets the output and integral term saturation
@@ -179,5 +179,5 @@ void DSP_PID_SetGains_f64(DSP_PID_Instance_f32* regulator, double Kp, double, do
  * @param[in]   Tt		   Integral windup reset time constant
  * @param[in]   Ts		   Fixed sampling time
  */
-void DSP_PID_SetSaturation_f64(DSP_PID_Instance_f32* regulator, double min, double max, double Tt, double Ts);
+void DSP_PID_SetSaturation_f64(DSP_PID_Instance_f64* regulator, double min, double max, double Tt, double Ts);
 #endif /* INC_PID_H_ */

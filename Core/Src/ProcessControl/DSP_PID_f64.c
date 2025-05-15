@@ -1,17 +1,13 @@
 //
 // Created by pwoli on 29.04.2025.
 //
+#include "DSP_Utils.h"
+#include "ProcessControl.h"
+
 #include <float.h>
-#include <ProcessControl.h>
-
-static double clamp(const double x, const double min, const double max)
-{
-	const double t = x < min ? min : x;
-	return t > max ? max : t;
-}
 
 
-void DSP_PID_Init_f64(DSP_PID_Instance_f32* regulator,
+void DSP_PID_Init_f64(DSP_PID_Instance_f64* regulator,
                       const double Kp,
                       const double Ti,
                       const double Td,
@@ -23,7 +19,7 @@ void DSP_PID_Init_f64(DSP_PID_Instance_f32* regulator,
 	regulator->Kd[0] = Td / (Td + N * Ts);
 	regulator->Kd[1] = Kp * N * regulator->Kd[0];
 
-	regulator->Ki = Kp * Ts / Ti;
+	regulator->Ki = Ti != 0.0 ? Kp * Ts / Ti : 0.0;
 
 	regulator->K_SetPointRatio = 1.0;
 	regulator->D_SetPointRatio = 0.0;
@@ -32,7 +28,7 @@ void DSP_PID_Init_f64(DSP_PID_Instance_f32* regulator,
 	regulator->OutMin          = -DBL_MAX;
 }
 
-double DSP_PID_Update_f64(DSP_PID_Instance_f32* regulator, const double sp, const double pv)
+double DSP_PID_Update_f64(DSP_PID_Instance_f64* regulator, const double sp, const double pv)
 {
 	// P
 	double out = regulator->K * (regulator->K_SetPointRatio * sp - pv);
@@ -42,8 +38,8 @@ double DSP_PID_Update_f64(DSP_PID_Instance_f32* regulator, const double sp, cons
 	  regulator->Kd[0] * regulator->_prevDiff
 	  - regulator->Kd[1] * (pv - regulator->_prevPV - regulator->D_SetPointRatio * (sp - regulator->_prevSP));
 
-	out                += diff + regulator->_integralState;
-	const double out_lim = clamp(out, regulator->OutMin, regulator->OutMax);
+	out                 += diff + regulator->_integralState;
+	const double out_lim = DSP_Clamp_f64(out, regulator->OutMin, regulator->OutMax);
 
 	// I
 	regulator->_integralState += regulator->Ki * (sp - pv) + regulator->Int_Rst_T * (out_lim - out);
@@ -55,7 +51,7 @@ double DSP_PID_Update_f64(DSP_PID_Instance_f32* regulator, const double sp, cons
 	return out_lim;
 }
 
-void DSP_PID_SetGains_f64(DSP_PID_Instance_f32* regulator,
+void DSP_PID_SetGains_f64(DSP_PID_Instance_f64* regulator,
                           const double Kp,
                           const double Ti,
                           const double Td,
@@ -67,17 +63,17 @@ void DSP_PID_SetGains_f64(DSP_PID_Instance_f32* regulator,
 	regulator->Kd[0] = Td / (Td + N * Ts);
 	regulator->Kd[1] = Kp * N * regulator->Kd[0];
 
-	regulator->Ki = Kp * Ts / Ti;
+	regulator->Ki = Ti != 0.0 ? Kp * Ts / Ti : 0.0;
 }
 
 
-void DSP_PID_SetSaturation_f64(DSP_PID_Instance_f32* regulator,
+void DSP_PID_SetSaturation_f64(DSP_PID_Instance_f64* regulator,
                                const double min,
                                const double max,
                                const double Tt,
                                const double Ts)
 {
-	regulator->Int_Rst_T       = Ts / Tt;
-	regulator->OutMax          = max;
-	regulator->OutMin          = min;
+	regulator->Int_Rst_T = Ts / Tt;
+	regulator->OutMax    = max;
+	regulator->OutMin    = min;
 }
