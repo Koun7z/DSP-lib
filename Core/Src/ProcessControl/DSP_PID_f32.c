@@ -72,7 +72,7 @@ void DSP_PID_SetSaturation_f32(DSP_PID_Instance_f32* regulator,
                                const float Tt,
                                const float Ts)
 {
-	regulator->Int_Rst_T = Ts / Tt;
+	regulator->Int_Rst_T = Tt == 0.0f? 0.0f : Ts / Tt;
 	regulator->OutMax    = max;
 	regulator->OutMin    = min;
 }
