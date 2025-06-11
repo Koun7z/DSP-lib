@@ -183,18 +183,4 @@ float DSP_IIR_RT_Update_f32(DSP_IIR_RT_Instance_f32* filter, float input);
  */
 double DSP_IIR_RT_Update_f64(DSP_IIR_RT_Instance_f64* filter, double input);
 
-/**
- * brief		  Reverses elements inside float array (in place)
- * @param[inout] *arr   Array to be reversed
- * @param[in]     size  Array size
- */
-void DSP_ReverseArray_f32(float* arr, size_t size);
-
-/**
- * brief		  Reverses elements inside double array (in place)
- * @param[inout] *arr   Array to be reversed
- * @param[in]     size  Array size
- */
-void DSP_ReverseArray_f64(double* arr, size_t size);
-
 #endif  // SIGNALFILTERING_H
