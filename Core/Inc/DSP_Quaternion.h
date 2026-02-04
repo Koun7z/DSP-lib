@@ -12,10 +12,10 @@
  */
 typedef struct
 {
-	float r;
-	float i;
-	float j;
-	float k;
+    float r;
+    float i;
+    float j;
+    float k;
 } DSP_Quaternion_f32;
 
 /**

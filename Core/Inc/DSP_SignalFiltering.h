@@ -17,10 +17,10 @@
  */
 typedef struct
 {
-	size_t Order;
-	const float* Coeffs;
-	float* _pastSamplesBuff;
-	size_t _buffPointer;
+    size_t Order;
+    const float* Coeffs;
+    float* _pastSamplesBuff;
+    size_t _buffPointer;
 } DSP_FIR_RT_Instance_f32;
 
 /**
@@ -30,10 +30,10 @@ typedef struct
  */
 typedef struct
 {
-	size_t Order;
-	const double* Coeffs;
-	double* _pastSamplesBuff;
-	size_t _buffPointer;
+    size_t Order;
+    const double* Coeffs;
+    double* _pastSamplesBuff;
+    size_t _buffPointer;
 } DSP_FIR_RT_Instance_f64;
 
 /**
@@ -43,12 +43,12 @@ typedef struct
  */
 typedef struct
 {
-	size_t Order;
-	const float* CoeffsNumerator;
-	const float* CoeffsDenominator;
-	float* _pastSamplesBuff;
-	float* _pastSamplesBuffFiltered;
-	size_t _buffPointer;
+    size_t Order;
+    const float* CoeffsNumerator;
+    const float* CoeffsDenominator;
+    float* _pastSamplesBuff;
+    float* _pastSamplesBuffFiltered;
+    size_t _buffPointer;
 } DSP_IIR_RT_Instance_f32;
 
 /**
@@ -58,12 +58,12 @@ typedef struct
  */
 typedef struct
 {
-	size_t Order;
-	const double* CoeffsNumerator;
-	const double* CoeffsDenominator;
-	double* _pastSamplesBuff;
-	double* _pastSamplesBuffFiltered;
-	size_t _buffPointer;
+    size_t Order;
+    const double* CoeffsNumerator;
+    const double* CoeffsDenominator;
+    double* _pastSamplesBuff;
+    double* _pastSamplesBuffFiltered;
+    size_t _buffPointer;
 } DSP_IIR_RT_Instance_f64;
 
 /**

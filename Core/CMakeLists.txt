@@ -6,5 +6,8 @@ add_library(DSP-lib STATIC)
 include(Src/MathematicalStructures/Config.cmake)
 include(Src/ProcessControl/Config.cmake)
 include(Src/SignalFiltering/Config.cmake)
+include(Src/AHRS/Config.cmake)
 
-target_include_directories(DSP-lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Inc)
+target_include_directories(DSP-lib PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/Inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Inc/AHRS)

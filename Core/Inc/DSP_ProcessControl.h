@@ -13,12 +13,12 @@
  */
 typedef struct
 {
-	// PID Config
-	float A[3];
+    // PID Config
+    float A[3];
 
-	// PID State
-	float _prevErr[2];
-	float output;
+    // PID State
+    float _prevErr[2];
+    float output;
 } DSP_SimplePID_Instance_f32;
 
 /**
@@ -28,21 +28,21 @@ typedef struct
  */
 typedef struct
 {
-	// PID Parameters
-	float K;                // Proportional gain
-	float Ki;               // Integral gain
-	float Kd[2];            // Differential gain
-	float K_SetPointRatio;  // Proportional SP ratio (default = 1)
-	float D_SetPointRatio;  // Differential SP ratio (default = 0)
-	float OutMax;           // Maximum output
-	float OutMin;           // Minimum output
-	float Int_Rst_T;        // Integral windup reset time
+    // PID Parameters
+    float K;           // Proportional gain
+    float Ki;          // Integral gain
+    float Kd[2];       // Differential gain
+    float K_SP_Ratio;  // Proportional SP ratio (default = 1)
+    float D_SP_Ratio;  // Differential SP ratio (default = 0)
+    float OutMax;      // Maximum output
+    float OutMin;      // Minimum output
+    float Int_Rst_T;   // Integral windup reset time
 
-	// PID State
-	float _integralState;  // Current integral value
-	float _prevDiff;       // Previous differential output
-	float _prevPV;         // Previous process value
-	float _prevSP;         // Previous process value
+    // PID State
+    float _integralState;  // Current integral value
+    float _prevDiff;       // Previous differential output
+    float _prevPV;         // Previous process value
+    float _prevSP;         // Previous process value
 } DSP_PID_Instance_f32;
 
 /**
@@ -52,21 +52,21 @@ typedef struct
  */
 typedef struct
 {
-	// PID Parameters
-	double K;                // Proportional gain
-	double Ki;               // Integral gain
-	double Kd[2];            // Differential gain
-	double K_SetPointRatio;  // Proportional SP ratio (default = 1)
-	double D_SetPointRatio;  // Differential SP ratio (default = 0)
-	double OutMax;           // Maximum output
-	double OutMin;           // Minimum output
-	double Int_Rst_T;        // Integral windup reset time
+    // PID Parameters
+    double K;           // Proportional gain
+    double Ki;          // Integral gain
+    double Kd[2];       // Differential gain
+    double K_SP_Ratio;  // Proportional SP ratio (default = 1)
+    double D_SP_Ratio;  // Differential SP ratio (default = 0)
+    double OutMax;      // Maximum output
+    double OutMin;      // Minimum output
+    double Int_Rst_T;   // Integral windup reset time
 
-	// PID State
-	double _integralState;  // Current integral value
-	double _prevDiff;       // Previous differential output
-	double _prevPV;         // Previous process value
-	double _prevSP;         // Previous process value
+    // PID State
+    double _integralState;  // Current integral value
+    double _prevDiff;       // Previous differential output
+    double _prevPV;         // Previous process value
+    double _prevSP;         // Previous process value
 } DSP_PID_Instance_f64;
 
 
@@ -109,7 +109,7 @@ void DSP_PID_Init_f32(DSP_PID_Instance_f32* regulator, float Kp, float Ti, float
  * @param[in]     processValue  Value of controlled process output
  * @return 	      float         PID output
  */
-float DSP_PID_Update_f32(DSP_PID_Instance_f32* regulator, float setPoint, float processValue);
+float DSP_PID_Update_f32(DSP_PID_Instance_f32* regulator, float sp, float pv);
 
 /**
  * @brief	    Updates PID parameters without resetting the internal state.
@@ -157,7 +157,7 @@ void DSP_PID_Init_f64(DSP_PID_Instance_f64* regulator, double Kp, double Ti, dou
  * @param[in]     processValue  Value of controlled process output
  * @return 	      float         PID output
  */
-double DSP_PID_Update_f64(DSP_PID_Instance_f64* regulator, double setPoint, double processValue);
+double DSP_PID_Update_f64(DSP_PID_Instance_f64* regulator, double sp, double pv);
 
 /**
  * @brief	    Updates PID parameters without resetting the internal state.
