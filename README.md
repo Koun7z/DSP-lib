@@ -1,10 +1,7 @@
 # Digital Signal Processing Library
 
-A multiplatform C library implementing commonly used digital signal processing algorithms and other more complex
+A multipletom C library implementing commonly used digital signal processing algorithms and other more complex
 mathematical functions.
-
-It was made with a purpose of learning and using it in personal projects (mostly on Arm microcontrollers,
-though it's not specifically optimised for that).
 
 ## Currently implemented features (_and some plans for not so near future_):
 
@@ -20,11 +17,18 @@ though it's not specifically optimised for that).
     - [x] PID controller
       - D-term filter
       - Output saturation + anti-windup
-      - Partial set point gains for K and D parts
+      - Partial setpoint gain for K and D parts (simplified 2D PID)
+- Attitude and Heading Reference System Algorithms:
+    - [x] Quaternion Complementary Attitude Estimator
+    - [ ] Quaternion Extended Kalman Attitude Filter (WIP)
+    - [ ] Madgwick Orientation Filter
+    - [ ] Mahony Orientation Filter
 - Other math algorithms:
     - [x] Quaternion math
     - [ ] Complex numbers math
-    - [ ] Vector and matrix math
+    - [ ] Vector and matrix math (WIP)
+        - Embedded friendly vector and matrix math with no dynamic allocation
+        - Easier to use dynamic version for less constrained systems (dMatrix, dVector modules)
 
 > [!NOTE]
 > The library is in a state of constant development. All parts of the library are subject to change.
@@ -43,7 +47,7 @@ If running the library on microcontroller of any kind:
 
 ### Necessary files:
 
-The library is set up to be built with CMake, but if you want to use other tools,
+The library is set up with CMake in mind, but if you want to use other tools,
 all files needed to build the library are inside the `Core` folder.
 
 ### Building with CMake:
@@ -68,7 +72,7 @@ add_link_options(${LINKER_OPTIONS})
 
 # Add the library as subdirectory
 # ${DSP-lib} is a relative path to your instance of the library
-add_subdirectory(${DSP-lib}/Core)
+add_subdirectory(${DSP-lib})
 
 # Link the binary to your project
 target_link_libraries(${PROJECT_NAME} PRIVATE DSP-lib)

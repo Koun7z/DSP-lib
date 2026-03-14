@@ -1,0 +1,22 @@
+#ifndef AHRS_DSP_EKF_H__
+#define AHRS_DSP_EKF_H__
+
+#include "DSP_AHRS_Data.h"
+
+typedef struct
+{
+    float GyroNoise[3];
+    float AccNoise[3];
+    float MagNoise[3];
+
+    float _covariance[16];
+} DSP_AHRS_EKF_Instance_f32;
+
+int DSP_AHRS_EKF_Init_f32(DSP_AHRS_EKF_Instance_f32* filter,
+                          const float GyroNoise[3],
+                          const float AccNoise[3],
+                          const float MagNoise[3]);
+
+void DSP_AHRS_EKF_FilterUpdate_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt);
+
+#endif

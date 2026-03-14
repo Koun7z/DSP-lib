@@ -4,7 +4,9 @@
 
 #ifndef DSP_UTILS_H
 #define DSP_UTILS_H
+
 #include <math.h>
+#include <stddef.h>
 
 static inline float DSP_Clamp_f32(const float x, const float min, const float max)
 {
