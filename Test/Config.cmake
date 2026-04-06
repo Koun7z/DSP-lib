@@ -9,7 +9,14 @@ find_package(Threads REQUIRED)
 
 # Test sources here
 add_executable(test_dsp
-    ${TEST_DIR}/test_matrix.c
+    ${TEST_DIR}/test_main.c
+    ${TEST_DIR}/test_registry.cpp
+    ${TEST_DIR}/Matrix/test_matrix.c
+    ${TEST_DIR}/Matrix/test_lup.c
+)
+
+target_include_directories(test_dsp PRIVATE
+    ${TEST_DIR}
 )
 
 # Include and link

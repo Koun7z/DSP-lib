@@ -29,6 +29,6 @@ echo "==> Building..."
 cmake --build "${BUILD_DIR}" --config "${BUILD_TYPE}" -- -j$(nproc)
 
 echo "==> Running tests..."
-ctest --test-dir "${BUILD_DIR}" ${CTEST_ARGS} --output-on-failure
+./"${BUILD_DIR}/test_dsp"
 
 echo "==> Done."
