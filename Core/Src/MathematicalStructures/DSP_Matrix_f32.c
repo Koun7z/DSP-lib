@@ -248,7 +248,7 @@ void DSP_Matrix_LUPInvert_f32(float* IA, const float* LU, const size_t* P, size_
     {
         for(size_t i = 0; i < N; i++)
         {
-            IA[i * N + j] = P[i] == j ? 1.0f : 0.0f;
+            IA[i * N + j] = (P[i] == j ? 1.0f : 0.0f);
 
             for(size_t k = 0; k < i; k++)
             {
@@ -256,7 +256,7 @@ void DSP_Matrix_LUPInvert_f32(float* IA, const float* LU, const size_t* P, size_
             }
         }
 
-        for(size_t i = N - 1; i >= 0; i--)
+        for(int i = N - 1; i >= 0; i--)
         {
             for(size_t k = i + 1; k < N; k++)
             {
