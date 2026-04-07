@@ -22,10 +22,15 @@ void DSP_PID_Init_f32(DSP_PID_Instance_f32* regulator,
     regulator->Ki = Ti != 0 ? Kp * Ts / Ti : 0.0f;
 
     regulator->K_SP_Ratio = 1.0f;
-    regulator->D_SP_Ratio = 0.0f;
+    regulator->D_SP_Ratio = 1.0f;
     regulator->Int_Rst_T  = 0.0f;
     regulator->OutMax     = FLT_MAX;
     regulator->OutMin     = -FLT_MAX;
+
+    regulator->_prevPV        = 0.0f;
+    regulator->_prevSP        = 0.0f;
+    regulator->_prevDiff      = 0.0f;
+    regulator->_integralState = 0.0f;
 }
 
 float DSP_PID_Update_f32(DSP_PID_Instance_f32* regulator, const float sp, const float pv)
@@ -37,11 +42,14 @@ float DSP_PID_Update_f32(DSP_PID_Instance_f32* regulator, const float sp, const 
     const float diff = regulator->Kd[0] * regulator->_prevDiff
                      - regulator->Kd[1] * (pv - regulator->_prevPV - regulator->D_SP_Ratio * (sp - regulator->_prevSP));
 
+    // I
+    regulator->_integralState += regulator->Ki * (sp - pv);
+
     out                += diff + regulator->_integralState;
     const float out_lim = DSP_Clamp_f32(out, regulator->OutMin, regulator->OutMax);
 
-    // I
-    regulator->_integralState += regulator->Ki * (sp - pv) + regulator->Int_Rst_T * (out_lim - out);
+    // Anti-windup using back-calculation method
+    regulator->_integralState -= regulator->Int_Rst_T * (out - out_lim);
 
     regulator->_prevPV   = pv;
     regulator->_prevSP   = sp;
