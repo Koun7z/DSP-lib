@@ -20,7 +20,7 @@ if [[ "${1:-}" == "--ctest-args" ]]; then
   shift || true
 fi
 
-BUILD_DIR="build/${BUILD_TYPE,,}"   # e.g., build-debug or build-release
+BUILD_DIR="build/${BUILD_TYPE,,}" 
 
 echo "==> Configuring (${BUILD_TYPE}) with tests enabled..."
 cmake -B "${BUILD_DIR}" -S . -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DBUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON

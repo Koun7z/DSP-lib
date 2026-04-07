@@ -15,6 +15,8 @@ add_executable(test_dsp
     ${TEST_DIR}/Matrix/test_lup.c
     ${TEST_DIR}/Control/test_IIR.c
     ${TEST_DIR}/Control/test_PID.c
+    ${TEST_DIR}/AHRS/test_NC.c
+    ${TEST_DIR}/AHRS/test_EKF.c
 )
 
 target_include_directories(test_dsp PRIVATE
