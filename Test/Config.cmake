@@ -13,6 +13,8 @@ add_executable(test_dsp
     ${TEST_DIR}/test_registry.cpp
     ${TEST_DIR}/Matrix/test_matrix.c
     ${TEST_DIR}/Matrix/test_lup.c
+    ${TEST_DIR}/Control/test_IIR.c
+    ${TEST_DIR}/Control/test_PID.c
 )
 
 target_include_directories(test_dsp PRIVATE
@@ -26,7 +28,12 @@ target_include_directories(test_dsp PRIVATE
     ${INC_DIR}/AHRS
 )
 
-target_compile_options(test_dsp PRIVATE ${CHECK_CFLAGS_OTHER})
+target_compile_options(test_dsp PRIVATE
+    ${CHECK_CFLAGS_OTHER}
+    -Wall -Wextra
+    -O0 -g
+)
+
 target_link_libraries(test_dsp
     PRIVATE
     DSP-lib

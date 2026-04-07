@@ -1,5 +1,7 @@
 .vscode/
+.clangd
 
 build/
 
-.clangd
+matlab/data/*_output.csv
+matlab/**/*.asv

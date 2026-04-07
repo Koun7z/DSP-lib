@@ -110,9 +110,6 @@ START_TEST(lup_invert_test)
     float A[]      = {4, 3, 2, 2, 1, 5, 3, 1, 1, 1, 0, 2, 2, 1, 3, 2, 1, 3,
                       2, 1, 2, 3, 1, 4, 1, 0, 1, 1, 2, 2, 5, 2, 3, 4, 2, 1};
 
-    float A_orig[N * N];
-    memcpy(A_orig, A, sizeof(A));
-
     size_t P[N + 1];
     memset(P, 0, sizeof(P));
 
