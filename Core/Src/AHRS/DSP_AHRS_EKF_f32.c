@@ -119,7 +119,7 @@ void DSP_AHRS_EKF_FilterUpdate_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_D
 
     float P_hat[16];
     DSP_Matrix_SandwichMultiply_f32(P_hat, F, filter->_P, 4, 4);
-    DSP_Matrix_Add_f32(P_hat, P_hat, Q, 4, 4);
+    DSP_Matrix_AddInline_f32(P_hat, Q, 4, 4);
 
     /*
     ** Correction step
@@ -143,9 +143,9 @@ void DSP_AHRS_EKF_FilterUpdate_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_D
 
         // y = z - h(x)
         float y[3] = {
-            a_i - 2 * q_gyro.i * q_gyro.k - 2 * q_gyro.r * q_gyro.j,                                      
-            a_j - 2 * q_gyro.j * q_gyro.k + 2 * q_gyro.r * q_gyro.i,                                      
-            a_k - q_gyro.i * q_gyro.i - q_gyro.j * q_gyro.j + q_gyro.k * q_gyro.k + q_gyro.r * q_gyro.r
+            a_i - 2 * q_gyro.i * q_gyro.k + 2 * q_gyro.r * q_gyro.j,                                      
+            a_j - 2 * q_gyro.j * q_gyro.k - 2 * q_gyro.r * q_gyro.i,                                      
+            a_k + q_gyro.i * q_gyro.i + q_gyro.j * q_gyro.j - q_gyro.k * q_gyro.k - q_gyro.r * q_gyro.r
         };
 
         float H[12] = {
@@ -163,11 +163,11 @@ void DSP_AHRS_EKF_FilterUpdate_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_D
         // clang-format on
 
         // S[3x3]
-        float S[16];
+        float S[9];
         DSP_Matrix_SandwichMultiply_f32(S, H, P_hat, 3, 4);
         S[0] += filter->AccNoise[0];
-        S[3] += filter->AccNoise[1];
-        S[6] += filter->AccNoise[2];
+        S[4] += filter->AccNoise[1];
+        S[8] += filter->AccNoise[2];
 
         // K[4x3]
         // K = P * H^T * S^-1
@@ -197,9 +197,9 @@ void DSP_AHRS_EKF_FilterUpdate_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_D
         DSP_Matrix_Multiply_f32(KH, K, 4, 3, H, 4);
         DSP_Matrix_Scale_f32(KH, KH, -1.0f, 4, 4);
         KH[0]  += 1.0f;
-        KH[4]  += 1.0f;
-        KH[8]  += 1.0f;
-        KH[12] += 1.0f;
+        KH[5]  += 1.0f;
+        KH[10] += 1.0f;
+        KH[15] += 1.0f;
 
         DSP_Matrix_Multiply_f32(filter->_P, KH, 4, 4, P_hat, 4);
     }
