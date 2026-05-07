@@ -1,6 +1,7 @@
-#include "DSP_AHRS_EKF.h"
+#include "DSP_AHRS_Madgwick.h"
 
 #include "test_registry.h"
+
 #include "AHRS_TestData.h"
 
 #include <stdio.h>
@@ -8,7 +9,7 @@
 
 #define BASE_BLOCK_SIZE 128
 
-START_TEST(DSP_AHRS_EKF)
+START_TEST(DSP_AHRS_Madgwick)
 {
     size_t cnt                 = 0;
     AHRS_TestData_t* test_data = AHRS_LoadTestData("./Test/RepoIMU/TStick/TStick_Test02_Trial1.csv", &cnt);
@@ -17,28 +18,13 @@ START_TEST(DSP_AHRS_EKF)
         ck_abort_msg("Failed to load test data");
     }
 
-    DSP_AHRS_EKF_Instance_f32 ekf_filter;
-    // clang-format off
-    float gyro_noise[3 * 3] = {   // Process noise covariance
-        0.01f, 0.0f, 0.0f,
-        0.0f, 0.01f, 0.0f,
-        0.0f, 0.0f, 0.01f
-    };
-
-    float acc_noise[3 * 3] =  {   // Process noise covariance
-        0.15f, 0.0f, 0.0f,
-        0.0f, 0.15f, 0.0f,
-        0.0f, 0.0f, 0.15f
-    };
-    // clang-format on
-    int status = DSP_AHRS_EKF_Init_f32(&ekf_filter, gyro_noise, acc_noise, NULL);
-
-    ck_assert_int_eq(status, 0);
+    DSP_AHRS_Madgwick_Instance_f32 madgwick_filter;
+    DSP_AHRS_Madgwick_Init_f32(&madgwick_filter, 0.033f, false);
 
     DSP_AHRS_DataInstance_f32 data;
     DSP_AHRS_DataInit_f32(&data);
 
-    FILE* fw = fopen("./python/data/ahrs_ekf_output.csv", "w");
+    FILE* fw = fopen("./python/data/ahrs_madgwick_output.csv", "w");
 
     for(size_t i = 0; i < cnt; i++)
     {
@@ -50,7 +36,7 @@ START_TEST(DSP_AHRS_EKF)
         data.AccData[1] = test_data[i].AccData[1];
         data.AccData[2] = test_data[i].AccData[2];
 
-        DSP_AHRS_EKF_FilterUpdate_f32(&ekf_filter, &data, 0.01f);
+        DSP_AHRS_Madgwick_FilterUpdate_f32(&madgwick_filter, &data, 0.01f);
         fprintf(fw, "%f,%f,%f,%f\n", data.AttitudeEstimate.r, data.AttitudeEstimate.i, data.AttitudeEstimate.j,
                 data.AttitudeEstimate.k);
     }
@@ -58,10 +44,10 @@ START_TEST(DSP_AHRS_EKF)
     free(test_data);
     fclose(fw);
 
-    ck_assert_msg(1, "EKF AHRS output saved to ./python/data/ahrs_ekf_output.csv");
+    ck_assert_msg(1, "Madgwick AHRS output saved to ./python/data/ahrs_madgwick_output.csv");
 }
 
-__attribute__((constructor)) void register_EKF_tests()
+__attribute__((constructor)) void register_madgwick_tests()
 {
-    tr_add_test("AHRS", "EKF", DSP_AHRS_EKF);
+    tr_add_test("AHRS", "Madgwick", DSP_AHRS_Madgwick);
 }

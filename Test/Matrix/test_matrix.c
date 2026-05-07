@@ -67,7 +67,7 @@ START_TEST(addition_inline_test)
 
     float C[6] = {2.0f, 4.0f, 6.0f, 8.0f, 10.0f, 12.0f};
 
-    DSP_Matrix_AddInline_f32(A, B, 2, 3);
+    DSP_Matrix_AddInplace_f32(A, B, 2, 3);
 
     for(int i = 0; i < 6; i++)
     {
@@ -99,7 +99,7 @@ START_TEST(subtraction_inline_test)
 
     float C[6] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
-    DSP_Matrix_SubtractInline_f32(A, B, 2, 3);
+    DSP_Matrix_SubtractInplace_f32(A, B, 2, 3);
 
     for(int i = 0; i < 6; i++)
     {
@@ -129,7 +129,7 @@ START_TEST(scale_inline_test)
 
     float C[6] = {2.0f, 4.0f, 6.0f, 8.0f, 10.0f, 12.0f};
 
-    DSP_Matrix_ScaleInline_f32(A, 2.0f, 2, 3);
+    DSP_Matrix_ScaleInplace_f32(A, 2.0f, 2, 3);
 
     for(int i = 0; i < 6; i++)
     {
@@ -162,7 +162,7 @@ START_TEST(multiply_elements_inline_test)
 
     float C[6] = {1.0f, 4.0f, 9.0f, 16.0f, 25.0f, 36.0f};
 
-    DSP_Matrix_MultiplyElemsInline_f32(A, B, 2, 3);
+    DSP_Matrix_MultiplyElemsInplace_f32(A, B, 2, 3);
 
     for(int i = 0; i < 6; i++)
     {
@@ -191,7 +191,7 @@ START_TEST(transpose_inline_test)
     float A[9] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f};
     float B[9] = {1.0f, 4.0f, 7.0f, 2.0f, 5.0f, 8.0f, 3.0f, 6.0f, 9.0f};
 
-    DSP_Matrix_TransposeInline_f32(A, 3);
+    DSP_Matrix_TransposeInplace_f32(A, 3);
 
     for(int i = 0; i < 9; i++)
     {

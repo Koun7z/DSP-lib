@@ -17,6 +17,8 @@ add_executable(test_dsp
     ${TEST_DIR}/Control/test_PID.c
     ${TEST_DIR}/AHRS/test_NC.c
     ${TEST_DIR}/AHRS/test_EKF.c
+    ${TEST_DIR}/AHRS/test_Mahony.c
+    ${TEST_DIR}/AHRS/test_Madgwick.c
 )
 
 target_include_directories(test_dsp PRIVATE

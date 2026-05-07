@@ -11,7 +11,7 @@ void DSP_Matrix_Add_f32(float* __restrict result, const float* A, const float* B
     }
 }
 
-void DSP_Matrix_AddInline_f32(float* __restrict result, const float* A, size_t rows, size_t cols)
+void DSP_Matrix_AddInplace_f32(float* __restrict result, const float* A, size_t rows, size_t cols)
 {
     for(size_t i = 0; i < rows * cols; i++)
     {
@@ -26,7 +26,7 @@ void DSP_Matrix_Subtract_f32(float* __restrict result, const float* A, const flo
         result[i] = A[i] - B[i];
     }
 }
-void DSP_Matrix_SubtractInline_f32(float* result, const float* A, size_t rows, size_t cols)
+void DSP_Matrix_SubtractInplace_f32(float* result, const float* A, size_t rows, size_t cols)
 {
     for(size_t i = 0; i < rows * cols; i++)
     {
@@ -89,7 +89,7 @@ void DSP_Matrix_Scale_f32(float* __restrict result, const float* A, float s, siz
     }
 }
 
-void DSP_Matrix_ScaleInline_f32(float* result, float s, size_t rows, size_t cols)
+void DSP_Matrix_ScaleInplace_f32(float* result, float s, size_t rows, size_t cols)
 {
     for(size_t i = 0; i < rows * cols; i++)
     {
@@ -105,7 +105,7 @@ void DSP_Matrix_MultiplyElems_f32(float* __restrict result, const float* A, cons
     }
 }
 
-void DSP_Matrix_MultiplyElemsInline_f32(float* result, const float* A, size_t rows, size_t cols)
+void DSP_Matrix_MultiplyElemsInplace_f32(float* result, const float* A, size_t rows, size_t cols)
 {
     for(size_t i = 0; i < rows * cols; i++)
     {
@@ -113,7 +113,7 @@ void DSP_Matrix_MultiplyElemsInline_f32(float* result, const float* A, size_t ro
     }
 }
 
-void DSP_Matrix_Transpose_f32(float* result, const float* M, size_t rows, size_t cols)
+void DSP_Matrix_Transpose_f32(float* __restrict result, const float* M, size_t rows, size_t cols)
 {
     for(size_t i = 0; i < rows; i++)
     {
@@ -124,7 +124,7 @@ void DSP_Matrix_Transpose_f32(float* result, const float* M, size_t rows, size_t
     }
 }
 
-void DSP_Matrix_TransposeInline_f32(float* A, size_t N)
+void DSP_Matrix_TransposeInplace_f32(float* A, size_t N)
 {
     for(size_t i = 0; i < N; i++)
     {
@@ -137,7 +137,7 @@ void DSP_Matrix_TransposeInline_f32(float* A, size_t N)
     }
 }
 
-int DSP_Matrix_LUPDecompose_f32(float* A, size_t N, float tol, size_t* P)
+int DSP_Matrix_LUPDecompose_f32(float* __restrict A, size_t N, float tol, size_t* __restrict P)
 {
     size_t j;
     size_t k;
@@ -172,15 +172,13 @@ int DSP_Matrix_LUPDecompose_f32(float* A, size_t N, float tol, size_t* P)
 
         if(i_max != i)
         {
-            // pivoting P
             j        = P[i];
             P[i]     = P[i_max];
             P[i_max] = j;
 
-            // pivoting rows of A
             DSP_Matrix_SwapRows_f32(A, i, i_max, N);
 
-            // counting pivots starting from N (for determinant)
+            // counting pivots
             P[N]++;
         }
 
@@ -195,10 +193,10 @@ int DSP_Matrix_LUPDecompose_f32(float* A, size_t N, float tol, size_t* P)
         }
     }
 
-    return 0;  // decomposition done
+    return 0;
 }
 
-void DSP_Matrix_LUPSolve_f32(const float* LU, const size_t* P, float* x, const float* b, size_t N)
+void DSP_Matrix_LUPSolve_f32(const float* LU, const size_t* P, float* __restrict x, const float* b, size_t N)
 {
     for(size_t i = 0; i < N; i++)
     {
@@ -221,7 +219,7 @@ void DSP_Matrix_LUPSolve_f32(const float* LU, const size_t* P, float* x, const f
     }
 }
 
-void DSP_Matrix_LUPRightSolve_f32(const float* LU, const size_t* P, float* x, const float* b, size_t N)
+void DSP_Matrix_LUPRightSolve_f32(const float* LU, const size_t* P, float* __restrict x, const float* b, size_t N)
 {
     for(size_t j = 0; j < N; j++)
     {
@@ -242,7 +240,7 @@ void DSP_Matrix_LUPRightSolve_f32(const float* LU, const size_t* P, float* x, co
     }
 }
 
-void DSP_Matrix_LUPInvert_f32(float* IA, const float* LU, const size_t* P, size_t N)
+void DSP_Matrix_LUPInvert_f32(float* __restrict IA, const float* LU, const size_t* P, size_t N)
 {
     for(size_t j = 0; j < N; j++)
     {

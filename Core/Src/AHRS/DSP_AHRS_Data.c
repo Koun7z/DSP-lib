@@ -1,5 +1,6 @@
 #include "DSP_AHRS_Data.h"
 #include "DSP_SignalFiltering.h"
+#include "DSP_Assert.h"
 
 void DSP_AHRS_DataInit_f32(DSP_AHRS_DataInstance_f32* instance)
 {
@@ -39,7 +40,7 @@ void DSP_AHRS_AddMagFilters_f32(DSP_AHRS_DataInstance_f32* instance, DSP_IIR_RT_
 
 void DSP_AHRS_UpdateFilterGyroData_f32(DSP_AHRS_DataInstance_f32* instance, const float gyroData[3])
 {
-    assert(instance->_gyroFilters);
+    DSP_ASSERT(instance->_gyroFilters);
 
     for(size_t i = 0; i < 3; i++)
     {
@@ -49,7 +50,7 @@ void DSP_AHRS_UpdateFilterGyroData_f32(DSP_AHRS_DataInstance_f32* instance, cons
 
 void DSP_AHRS_UpdateFilterAccData_f32(DSP_AHRS_DataInstance_f32* instance, const float accData[3])
 {
-    assert(instance->_accFilters);
+    DSP_ASSERT(instance->_accFilters);
 
     for(size_t i = 0; i < 3; i++)
     {
@@ -59,7 +60,7 @@ void DSP_AHRS_UpdateFilterAccData_f32(DSP_AHRS_DataInstance_f32* instance, const
 
 void DSP_AHRS_UpdateFilterMagData_f32(DSP_AHRS_DataInstance_f32* instance, const float magData[3])
 {
-    assert(instance->_magFilters);
+    DSP_ASSERT(instance->_magFilters);
 
     for(size_t i = 0; i < 3; i++)
     {

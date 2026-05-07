@@ -22,7 +22,7 @@ void DSP_Matrix_Add_f32(float* __restrict result, const float* A, const float* B
  * @param rows
  * @param cols
  */
-void DSP_Matrix_AddInline_f32(float* __restrict result, const float* A, size_t rows, size_t cols);
+void DSP_Matrix_AddInplace_f32(float* __restrict result, const float* A, size_t rows, size_t cols);
 
 /**
  * @brief result = A - B
@@ -43,7 +43,7 @@ void DSP_Matrix_Subtract_f32(float* __restrict result, const float* A, const flo
  * @param rows
  * @param cols
  */
-void DSP_Matrix_SubtractInline_f32(float* result, const float* A, size_t rows, size_t cols);
+void DSP_Matrix_SubtractInplace_f32(float* result, const float* A, size_t rows, size_t cols);
 
 /**
  * @brief result = A * B
@@ -90,7 +90,7 @@ void DSP_Matrix_Scale_f32(float* __restrict result, const float* A, float s, siz
  * @param rows
  * @param cols
  */
-void DSP_Matrix_ScaleInline_f32(float* result, float s, size_t rows, size_t cols);
+void DSP_Matrix_ScaleInplace_f32(float* result, float s, size_t rows, size_t cols);
 
 /**
  * @brief result = A .* B (Element-wise multiplication)
@@ -109,7 +109,7 @@ void DSP_Matrix_MultiplyElems_f32(float* __restrict result, const float* A, cons
  * @param rows
  * @param cols
  */
-void DSP_Matrix_MultiplyElemsInline_f32(float* result, const float* A, size_t rows, size_t cols);
+void DSP_Matrix_MultiplyElemsInplace_f32(float* result, const float* A, size_t rows, size_t cols);
 
 /**
  * @brief result = A^T
@@ -127,7 +127,7 @@ void DSP_Matrix_Transpose_f32(float* __restrict result, const float* M, size_t r
  * @param A
  * @param N
  */
-void DSP_Matrix_TransposeInline_f32(float* A, size_t N);
+void DSP_Matrix_TransposeInplace_f32(float* A, size_t N);
 
 
 static inline void DSP_Matrix_SwapRows_f32(float* A, size_t r1, size_t r2, size_t cols)
@@ -157,7 +157,7 @@ static inline void DSP_Matrix_SwapRows_f32(float* A, size_t r1, size_t r2, size_
  *                    - 0 on success
  *                    - 1 if the matrix is near degenerate
  */
-int DSP_Matrix_LUPDecompose_f32(float* __restrict A, size_t N, float tol, size_t* P);
+int DSP_Matrix_LUPDecompose_f32(float* __restrict A, size_t N, float tol, size_t* __restrict P);
 
 /**
  * @brief Solve for Ax = b using the LUP decomposition of A.
@@ -169,11 +169,7 @@ int DSP_Matrix_LUPDecompose_f32(float* __restrict A, size_t N, float tol, size_t
  * @param[in]  *b - Right-hand side vector of size N
  * @param[in]   N - Dimension of the matrix
  */
-void DSP_Matrix_LUPSolve_f32(const float* __restrict LU,
-                             const size_t* __restrict P,
-                             float* __restrict x,
-                             const float* __restrict b,
-                             size_t N);
+void DSP_Matrix_LUPSolve_f32(const float* LU, const size_t* P, float* __restrict x, const float* b, size_t N);
 
 /**
  * @brief Solve for a solution of xA = b using the LUP decomposition of A.
@@ -186,7 +182,7 @@ void DSP_Matrix_LUPSolve_f32(const float* __restrict LU,
  * @param[in]  *b  - Right-hand side vector of size N
  * @param[in]   N  - Dimension of the matrix
  */
-void DSP_Matrix_LUPRightSolve_f32(const float* LU, const size_t* P, float* x, const float* b, size_t N);
+void DSP_Matrix_LUPRightSolve_f32(const float* LU, const size_t* P, float* __restrict x, const float* b, size_t N);
 
 /**
  * @brief Compute the inverse of a matrix using its LUP decomposition.
@@ -196,7 +192,7 @@ void DSP_Matrix_LUPRightSolve_f32(const float* LU, const size_t* P, float* x, co
  * @param[in]    N - Dimension of the matrix
  * @param[out] *IA - Output matrix to store the inverse
  */
-void DSP_Matrix_LUPInvert_f32(float* __restrict IA, const float* __restrict LU, const size_t* __restrict P, size_t N);
+void DSP_Matrix_LUPInvert_f32(float* __restrict IA, const float* LU, const size_t* P, size_t N);
 
 /**
  * @brief Compute the determinant of a matrix using its LUP decomposition.
@@ -206,6 +202,6 @@ void DSP_Matrix_LUPInvert_f32(float* __restrict IA, const float* __restrict LU, 
  * @param[in]    N - Dimension of the matrix
  * @return float - The determinant of the initial matrix
  */
-float DSP_Matrix_LUPDeterminant_f32(const float* __restrict LU, const size_t* __restrict P, size_t N);
+float DSP_Matrix_LUPDeterminant_f32(const float* LU, const size_t* P, size_t N);
 
 #endif

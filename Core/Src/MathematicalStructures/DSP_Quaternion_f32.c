@@ -85,10 +85,33 @@ void DSP_QT_RotateVector_f32(float* dst, const float* v, const DSP_Quaternion_f3
     const float j = q->j;
     const float k = q->k;
 
-    const float rr = q->r * q->r;
-    const float ii = q->i * q->i;
-    const float jj = q->j * q->j;
-    const float kk = q->k * q->k;
+    const float rr = r * r;
+    const float ii = i * i;
+    const float jj = j * j;
+    const float kk = k * k;
+
+    dst[0] = x * ii + 2.0f * y * i * j + 2.0f * z * i * k - x * jj + 2.0f * z * j * r - x * kk - 2.0f * y * k * r
+           + x * rr;
+    dst[1] = -y * ii + 2.0f * x * i * j - 2.0f * z * i * r + y * jj + 2.0f * z * j * k - y * kk + 2 * x * k * r
+           + y * rr;
+    dst[2] = -z * ii + 2.0f * x * i * k + 2 * y * i * r - z * jj + 2.0f * y * j * k - 2 * x * j * r + z * kk + z * rr;
+}
+
+void DSP_QT_RotateVectorInv_f32(float* dst, const float* v, const DSP_Quaternion_f32* q)
+{
+    const float x = v[0];
+    const float y = v[1];
+    const float z = v[2];
+
+    const float r = q->r;
+    const float i = -q->i;
+    const float j = -q->j;
+    const float k = -q->k;
+
+    const float rr = r * r;
+    const float ii = i * i;
+    const float jj = j * j;
+    const float kk = k * k;
 
     dst[0] = x * ii + 2.0f * y * i * j + 2.0f * z * i * k - x * jj + 2.0f * z * j * r - x * kk - 2.0f * y * k * r
            + x * rr;

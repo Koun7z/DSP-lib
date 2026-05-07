@@ -3,5 +3,9 @@
 
 build/
 
+python/.venv/
+python/venv/
+python/data/*_output.csv
+
 matlab/data/*_output.csv
 matlab/**/*.asv
