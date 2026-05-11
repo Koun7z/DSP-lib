@@ -1,10 +1,12 @@
-#ifndef AHRS_TESTDATA_H__
-#define AHRS_TESTDATA_H__
+#ifndef AHRS_TESTUTILS_H__
+#define AHRS_TESTUTILS_H__
 
 #include "DSP_Quaternion.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include <limits.h>
 
 typedef struct
 {
@@ -14,6 +16,20 @@ typedef struct
 
     DSP_Quaternion_f32 AttitudeReference;
 } AHRS_TestData_t;
+
+
+static inline const char* get_full_path(const char* input_path, char* buffer, size_t buffer_size)
+{
+#if defined(__unix__) || defined(__APPLE__)
+    if(realpath(input_path, buffer) != NULL)
+    {
+        return buffer;
+    }
+#endif
+    strncpy(buffer, input_path, buffer_size - 1);
+    buffer[buffer_size - 1] = '\0';
+    return buffer;
+}
 
 
 #define BUF_SIZE 4096
@@ -46,7 +62,7 @@ static inline int count_lines(FILE* file)
     return counter;
 }
 
-static inline AHRS_TestData_t* AHRS_LoadTestData(char* path, size_t* out_cnt)
+static inline AHRS_TestData_t* AHRS_LoadTestData(const char* path, size_t* out_cnt)
 {
     FILE* f = fopen(path, "r");
     if(f == NULL)
@@ -120,4 +136,4 @@ static inline AHRS_TestData_t* AHRS_LoadTestData(char* path, size_t* out_cnt)
     return data;
 }
 
-#endif /* AHRS_TESTDATA_H__ */
+#endif /* AHRS_TESTUTILS_H__ */

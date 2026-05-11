@@ -1,7 +1,10 @@
 //
 // Created by pwoli on 18.03.2025.
 //
+
 #include "DSP_AHRS_NC.h"
+
+#include "DSP_Vector.h"
 
 #include <math.h>
 #include <float.h>
@@ -37,9 +40,11 @@ void DSP_AHRS_NC_FilterUpdate_f32(const DSP_AHRS_NC_Instance_f32* filter,
     const float q = data->GyroData[1];
     const float r = data->GyroData[2];
 
-    float a_i = data->AccData[0];
-    float a_j = data->AccData[1];
-    float a_k = data->AccData[2];
+    float acc_data[3]    = {data->AccData[0], data->AccData[1], data->AccData[2]};
+    const float acc_norm = DSP_Vector_Normalize_f32(acc_data, 3);
+    const float a_i      = acc_data[0];
+    const float a_j      = acc_data[1];
+    const float a_k      = acc_data[2];
 
     // Integrating local angular velocity
     const DSP_Quaternion_f32 omega_l = {.r = 0.0f, .i = p, .j = q, .k = r};
@@ -53,12 +58,6 @@ void DSP_AHRS_NC_FilterUpdate_f32(const DSP_AHRS_NC_Instance_f32* filter,
     DSP_QT_Add_f32(&q_gyro, &data->AttitudeEstimate, &delta_q_gyro);
     DSP_QT_Normalize_f32(&q_gyro, &q_gyro);  // TODO: Check effect of this normalization
 
-
-    // Normalizing local acceleration vector
-    const float acc_norm = sqrtf(a_i * a_i + a_j * a_j + a_k * a_k);
-    a_i                  = a_i / acc_norm;
-    a_j                  = a_j / acc_norm;
-    a_k                  = a_k / acc_norm;
 
     // Calculating predicted gravity vector
     float g_pred[3] = {a_i, a_j, a_k};
@@ -99,6 +98,9 @@ void DSP_AHRS_NC_FilterUpdate_f32(const DSP_AHRS_NC_Instance_f32* filter,
     }
 
     // Applying gain to accelerometer correction
+
+    // TODO: Remove the slerp branch all together?? When last testing i didn't see it enter this branch at all.
+    // Maybe for very low update frequency, very high gain
     if(delta_q_acc.r > filter->SLERP_Threshold)
     {
         DSP_QT_Scale_f32(&delta_q_acc, &delta_q_acc, acc_gain);

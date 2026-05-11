@@ -1,7 +1,6 @@
 #include "DSP_AHRS_Madgwick.h"
 #include "DSP_Matrix.h"
-
-#include <math.h>
+#include "DSP_Vector.h"
 
 int DSP_AHRS_Madgwick_Init_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta, bool use_mag)
 {
@@ -18,18 +17,12 @@ void DSP_AHRS_Madgwick_FilterUpdate_f32(DSP_AHRS_Madgwick_Instance_f32* filter,
     const float q = data->GyroData[1];
     const float r = data->GyroData[2];
 
-    float a_i = data->AccData[0];
-    float a_j = data->AccData[1];
-    float a_k = data->AccData[2];
+    float acc_data[3] = {data->AccData[0], data->AccData[1], data->AccData[2]};
+    DSP_Vector_Normalize_f32(acc_data, 3);
+    const float a_i = acc_data[0];
+    const float a_j = acc_data[1];
+    const float a_k = acc_data[2];
 
-    float m_i = data->MagData[0];
-    float m_j = data->MagData[1];
-    float m_k = data->MagData[2];
-
-    float a_norm = sqrtf(a_i * a_i + a_j * a_j + a_k * a_k);
-    a_i          = a_i / a_norm;
-    a_j          = a_j / a_norm;
-    a_k          = a_k / a_norm;
 
     // Integrating local angular velocity
     const DSP_Quaternion_f32 omega_l = {.r = 0.0f, .i = p, .j = q, .k = r};
@@ -47,10 +40,11 @@ void DSP_AHRS_Madgwick_FilterUpdate_f32(DSP_AHRS_Madgwick_Instance_f32* filter,
     float grad[4];
     if(filter->use_mag)
     {
-        float m_norm = sqrtf(m_i * m_i + m_j * m_j + m_k * m_k);
-        m_i          = m_i / m_norm;
-        m_j          = m_j / m_norm;
-        m_k          = m_k / m_norm;
+        float mag_data[3] = {data->MagData[0], data->MagData[1], data->MagData[2]};
+        DSP_Vector_Normalize_f32(mag_data, 3);
+        const float m_i = mag_data[0];
+        const float m_j = mag_data[1];
+        const float m_k = mag_data[2];
 
         // TODO:
 
@@ -104,13 +98,7 @@ void DSP_AHRS_Madgwick_FilterUpdate_f32(DSP_AHRS_Madgwick_Instance_f32* filter,
         DSP_Matrix_Multiply_f32(grad, J_gT, 4, 3, f_g, 1);
     }
 
-
-    float grad_norm = sqrtf(grad[0] * grad[0] + grad[1] * grad[1] + grad[2] * grad[2] + grad[3] * grad[3]);
-    grad[0]         = grad[0] / grad_norm;
-    grad[1]         = grad[1] / grad_norm;
-    grad[2]         = grad[2] / grad_norm;
-    grad[3]         = grad[3] / grad_norm;
-
+    DSP_Vector_Normalize_f32(grad, 4);
     data->AttitudeEstimate.r += (delta_q_gyro.r - filter->beta * grad[0]) * dt;
     data->AttitudeEstimate.i += (delta_q_gyro.i - filter->beta * grad[1]) * dt;
     data->AttitudeEstimate.j += (delta_q_gyro.j - filter->beta * grad[2]) * dt;

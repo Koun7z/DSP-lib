@@ -29,4 +29,12 @@
 #  define RAD_TO_DEG_F64 57.29577951308232087679
 #endif
 
+#ifndef DSP_NORM_EPSILON_F32
+#  define DSP_NORM_EPSILON_F32 1e-8f
+#endif
+
+#ifndef DSP_NORM_EPSILON_F64
+#  define DSP_NORM_EPSILON_F64 1e-16
+#endif
+
 #endif  // DSP_CONSTANTS_H

@@ -2,8 +2,8 @@
 
 #include "DSP_Matrix.h"
 #include "DSP_Assert.h"
+#include <DSP_Vector.h>
 
-#include <math.h>
 #include <string.h>
 
 int DSP_AHRS_EKF_Init_f32(DSP_AHRS_EKF_Instance_f32* filter,
@@ -62,15 +62,12 @@ void DSP_AHRS_EKF_FilterUpdate_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_D
     const float q = data->GyroData[1];
     const float r = data->GyroData[2];
 
-    float a_i = data->AccData[0];
-    float a_j = data->AccData[1];
-    float a_k = data->AccData[2];
+    float acc_data[3] = {data->AccData[0], data->AccData[1], data->AccData[2]};
+    DSP_Vector_Normalize_f32(acc_data, 3);
 
-    float norm_acc = sqrtf(a_i * a_i + a_j * a_j + a_k * a_k);
-
-    a_i /= norm_acc;
-    a_j /= norm_acc;
-    a_k /= norm_acc;
+    const float a_i = acc_data[0];
+    const float a_j = acc_data[1];
+    const float a_k = acc_data[2];
 
     // Integrating local angular velocity
     const DSP_Quaternion_f32 omega_l = {.r = 0.0f, .i = p, .j = q, .k = r};

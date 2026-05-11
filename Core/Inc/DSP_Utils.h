@@ -5,8 +5,12 @@
 #ifndef DSP_UTILS_H
 #define DSP_UTILS_H
 
+#include "DSP_Quaternion.h"
+
 #include <math.h>
-#include <stddef.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 static inline float DSP_Clamp_f32(const float x, const float min, const float max)
 {
@@ -58,6 +62,47 @@ static inline void DSP_ReverseArray_f64(double* arr, const size_t size)
         arr[i]            = arr[size - i - 1];
         arr[size - i - 1] = temp;
     }
+}
+
+/*
+** ToString functions for quick and dirty debugging. Remember to free the returned string after use.
+*/
+
+#define DSP_QT_ToString(_q)                                                                              \
+    _Generic((_q), DSP_Quaternion_f32: DSP_QT_ToString_f32, DSP_Quaternion_f64: DSP_QT_ToString_f64)(_q)
+
+#define DSP_Vec3_ToString(_vec) _Generic((_vec), float*: DSP_Vec3_ToString_f32, double*: DSP_Vec3_ToString_f64)(_vec)
+
+static inline char* DSP_QT_ToString_f32(DSP_Quaternion_f32 q)
+{
+    int len   = snprintf(NULL, 0, "[%.4f, %.4f, %.4f, %.4f]", q.r, q.i, q.j, q.k);
+    char* buf = malloc(len + 1);
+    snprintf(buf, len + 1, "[%.4f, %.4f, %.4f, %.4f]", q.r, q.i, q.j, q.k);
+    return buf;
+}
+
+static inline char* DSP_QT_ToString_f64(DSP_Quaternion_f64 q)
+{
+    int len   = snprintf(NULL, 0, "[%.8f, %.8f, %.8f, %.8f]", q.r, q.i, q.j, q.k);
+    char* buf = malloc(len + 1);
+    snprintf(buf, len + 1, "[%.8f, %.8f, %.8f, %.8f]", q.r, q.i, q.j, q.k);
+    return buf;
+}
+
+static inline char* DSP_Vec3_ToString_f32(const float* vec)
+{
+    int len   = snprintf(NULL, 0, "[%.4f, %.4f, %.4f]", vec[0], vec[1], vec[2]);
+    char* buf = malloc(len + 1);
+    snprintf(buf, len + 1, "[%.4f, %.4f, %.4f]", vec[0], vec[1], vec[2]);
+    return buf;
+}
+
+static inline char* DSP_Vec3_ToString_f64(const double* vec)
+{
+    int len   = snprintf(NULL, 0, "[%.8f, %.8f, %.8f]", vec[0], vec[1], vec[2]);
+    char* buf = malloc(len + 1);
+    snprintf(buf, len + 1, "[%.8f, %.8f, %.8f]", vec[0], vec[1], vec[2]);
+    return buf;
 }
 
 #endif  // DSP_UTILS_H

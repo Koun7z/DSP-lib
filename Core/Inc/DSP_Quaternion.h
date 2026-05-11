@@ -75,16 +75,6 @@ void DSP_QT_Scale_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q, floa
 void DSP_QT_Conjugate_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q);
 
 /**
- * @brief		Performs quaternion normalization and puts the resulting unit quaternion into dst output parameter.
- *
- *				dst = q / ||q||
- *
- * @param[out] *dst  Operation output
- * @param[in]  *q    Input quaternion
- */
-void DSP_QT_Normalize_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q);
-
-/**
  * @brief	   Calculates the quaternion norm as the square root of the product of a quaternion with its conjugate.
  *
  *			   dst = ||q|| = sqrt(q * conj(q))
@@ -93,6 +83,17 @@ void DSP_QT_Normalize_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q);
  * @retval     float  Quaternion norm
  */
 float DSP_QT_Norm_f32(const DSP_Quaternion_f32* q);
+
+/**
+ * @brief		Performs quaternion normalization and puts the resulting unit quaternion into dst output parameter.
+ *
+ *				dst = q / ||q||
+ *
+ * @param[out] *dst  Operation output
+ * @param[in]  *q    Input quaternion
+ * @retval     float  Quaternion norm
+ */
+float DSP_QT_Normalize_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q);
 
 /**
  * @brief		Rotates a 3d vector v by a unit quaternion q.

@@ -10,9 +10,9 @@ void DSP_AHRS_DataInit_f32(DSP_AHRS_DataInstance_f32* instance)
 
     instance->AccData[0] = 0.0f;
     instance->AccData[1] = 0.0f;
-    instance->AccData[2] = 1.0f;  // Initial gravity vector (z-axis)
+    instance->AccData[2] = 1.0f;
 
-    instance->MagData[0] = 1.0f;  // Initial north heading (x-axis)
+    instance->MagData[0] = 1.0f;
     instance->MagData[1] = 0.0f;
     instance->MagData[2] = 0.0f;
 
