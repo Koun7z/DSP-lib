@@ -9,6 +9,8 @@
 
 #define QT_90DEG_SINGULARITY_THRESHOLD 0.2f
 
+// TODO: Many of those should be inline
+
 void DSP_QT_Add_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q1, const DSP_Quaternion_f32* q2)
 {
     dst->r = q1->r + q2->r;
@@ -59,19 +61,34 @@ void DSP_QT_Conjugate_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q)
     dst->k = -q->k;
 }
 
-void DSP_QT_Normalize_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q)
-{
-    const float norm = sqrtf(q->r * q->r + q->i * q->i + q->j * q->j + q->k * q->k);
-
-    dst->r = q->r / norm;
-    dst->i = q->i / norm;
-    dst->j = q->j / norm;
-    dst->k = q->k / norm;
-}
-
 float DSP_QT_Norm_f32(const DSP_Quaternion_f32* q)
 {
     return sqrtf(q->r * q->r + q->i * q->i + q->j * q->j + q->k * q->k);
+}
+
+
+float DSP_QT_Normalize_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q)
+{
+    const float sq_norm = q->r * q->r + q->i * q->i + q->j * q->j + q->k * q->k;
+
+    if(sq_norm < (DSP_NORM_EPSILON_F32 * DSP_NORM_EPSILON_F32))
+    {
+        // For rotation only identity makes more sense, but generally this should be more correct
+        dst->r = 0.0f;  // 1.0f?
+        dst->i = 0.0f;
+        dst->j = 0.0f;
+        dst->k = 0.0f;
+        return 0.0f;
+    }
+    const float norm     = sqrtf(sq_norm);
+    const float inv_norm = 1.0f / norm;
+
+    dst->r = q->r * inv_norm;
+    dst->i = q->i * inv_norm;
+    dst->j = q->j * inv_norm;
+    dst->k = q->k * inv_norm;
+
+    return norm;
 }
 
 void DSP_QT_RotateVector_f32(float* dst, const float* v, const DSP_Quaternion_f32* q)
@@ -120,6 +137,7 @@ void DSP_QT_RotateVectorInv_f32(float* dst, const float* v, const DSP_Quaternion
     dst[2] = -z * ii + 2.0f * x * i * k + 2 * y * i * r - z * jj + 2.0f * y * j * k - 2 * x * j * r + z * kk + z * rr;
 }
 
+// TODO: Untested, most likely broken
 void DSP_QT_EulerAngles_f32(float* eulerAngles, const DSP_Quaternion_f32* q)
 {
     const float sing = q->i * q->j + q->k * q->r;

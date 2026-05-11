@@ -22,7 +22,7 @@ typedef struct
 } DSP_SimplePID_Instance_f32;
 
 /**
- * @breif  PID instance holding its parameters and internal state.
+ * @brief  PID instance holding its parameters and internal state.
  *		   [K/D]_SetPointRatio are the only parameters that should be modified directly.
  *		   All other parameters should be modified through provided Set functions.
  */
@@ -46,7 +46,7 @@ typedef struct
 } DSP_PID_Instance_f32;
 
 /**
- * @breif  Double precision PID instance holding its parameters and internal state.
+ * @brief  Double precision PID instance holding its parameters and internal state.
  *		   [K/D]_SetPointRatio are the only parameters that should be modified directly.
  *		   All other parameters should be modified through provided Set functions.
  */
@@ -71,7 +71,7 @@ typedef struct
 
 
 /**
- * @brief	    Initializes a simple, barebone PID internal structure.
+ * @brief	    Initializes a simple, bare bone PID internal structure.
  *				The Kp, Ti and Td are parameters of the PID controller in the Standard Form.
  * @param[out] *regulator PID Instance to initialize
  * @param[in]   Kp		  Proportional gain

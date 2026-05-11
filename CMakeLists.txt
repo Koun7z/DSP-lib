@@ -6,7 +6,7 @@ add_library(DSP-lib STATIC)
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src)
 set(INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc)
 
-include(${SRC_DIR}/MathematicalStructures/Config.cmake)
+include(${SRC_DIR}/Math/Config.cmake)
 include(${SRC_DIR}/ProcessControl/Config.cmake)
 include(${SRC_DIR}/SignalFiltering/Config.cmake)
 include(${SRC_DIR}/AHRS/Config.cmake)

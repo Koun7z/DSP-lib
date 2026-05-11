@@ -2,12 +2,10 @@
 // Created by pwoli on 29.04.2025.
 //
 
-#include "DSP_ProcessControl.h"
+#include "DSP_PID.h"
 #include "DSP_Utils.h"
 
-
 #include <float.h>
-
 
 void DSP_PID_Init_f64(DSP_PID_Instance_f64* regulator,
                       const double Kp,
@@ -29,10 +27,10 @@ void DSP_PID_Init_f64(DSP_PID_Instance_f64* regulator,
     regulator->OutMax     = DBL_MAX;
     regulator->OutMin     = -DBL_MAX;
 
-    regulator->_prevPV        = 0.0f;
-    regulator->_prevSP        = 0.0f;
-    regulator->_prevDiff      = 0.0f;
-    regulator->_integralState = 0.0f;
+    regulator->_prevPV        = 0.0;
+    regulator->_prevSP        = 0.0;
+    regulator->_prevDiff      = 0.0;
+    regulator->_integralState = 0.0;
 }
 
 double DSP_PID_Update_f64(DSP_PID_Instance_f64* regulator, const double sp, const double pv)

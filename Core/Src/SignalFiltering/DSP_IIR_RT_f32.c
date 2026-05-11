@@ -7,6 +7,8 @@
 
 #include "DSP_SignalFiltering.h"
 
+// TODO: Refactor to direct form II, unify the past sample buffer.
+
 void DSP_IIR_RT_Init_f32(DSP_IIR_RT_Instance_f32* filter,
                          size_t filterOrder,
                          const float* filterCoeffsNumerator,
