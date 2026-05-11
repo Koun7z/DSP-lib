@@ -9,32 +9,31 @@ Most of the algorithms don't use any dynamic allocation, so the memory footprint
 ## Currently implemented features (_and some plans for not so near future_):
 
 - Signal Processing:
-    - [x] Finite impulse response filters:
-        - [x] For real time conversion
-        - [ ] For converting blocks of samples
-    - [x] Infinite impulse response filters:
-        - [x] For real time conversion
-        - [ ] For converting blocks of samples
-    - [ ] Fourier Transform
+  - [x] Finite impulse response filters:
+    - [x] For real time conversion
+    - [ ] For converting blocks of samples
+  - [x] Infinite impulse response filters:
+    - [x] For real time conversion
+    - [ ] For converting blocks of samples
+  - [ ] Fourier Transform
 - Process Control:
-    - [x] PID controller
-      - D-term filter
-      - Output saturation + anti-windup
-      - Partial setpoint gain for K and D parts (simplified 2D PID)
+  - [x] PID controller
+    - D-term filter
+    - Output saturation + anti-windup (back-calculation)
+    - Partial setpoint gain for K and D parts (simplified 2D PID)
 - Attitude and Heading Reference System Algorithms:
-    - [x] Quaternion Complementary Attitude Estimator
-    - [ ] Quaternion Extended Kalman Filter (WIP)
-    - [ ] Madgwick Orientation Filter
-    - [ ] Mahony Orientation Filter
+  - [x] Quaternion Complementary Attitude Estimator
+  - [x] Quaternion Extended Kalman Filter
+  - [x] Madgwick Orientation Filter
+  - [x] Mahony Orientation Filter
 - Other Math Algorithms:
-    - [x] Quaternion math
-    - [ ] Complex numbers math
-    - [ ] Vector and matrix math (WIP)
-        - [x] Basic Matrix operations (addition, multiplication, transposition, inversion)
-        - [x] LU decomposition with partial pivoting (with left and right solve, inverse, and determinant helpers)
-        - [ ] Cholesky decomposition
-        - [ ] QR decomposition
-    
+  - [x] Quaternion math
+  - [ ] Complex numbers math
+  - [ ] Vector and matrix math (WIP)
+    - [x] Basic Matrix operations (addition, multiplication, transposition, inversion)
+    - [x] LU decomposition with partial pivoting (with left and right solve, inverse, and determinant helpers)
+    - [ ] Cholesky decomposition
+    - [ ] QR decomposition
 
 > [!NOTE]
 > The library is in a state of constant development. All parts of the library are subject to change.
