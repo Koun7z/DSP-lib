@@ -1,4 +1,4 @@
-#include "DSP_SignalFiltering.h"
+#include "DSP_IIR.h"
 #include "DSP_PID.h"
 
 #include "DSP_Utils.h"
@@ -63,14 +63,10 @@ START_TEST(PID_test_f32)
         order++;
     }
 
-    // Reverse direction
-    DSP_ReverseArray_f64(b, order);
-    DSP_ReverseArray_f64(a, order);
-
-    double* buff = malloc(sizeof(double) * order * 2);
+    double* buff = malloc(sizeof(double) * order);
 
     DSP_IIR_RT_Instance_f64 plant;
-    DSP_IIR_RT_Init_f64(&plant, order - 1, b, a, buff, &buff[order]);
+    DSP_IIR_RT_Init_f64(&plant, order - 1, b, a, buff);
 
     DSP_PID_Instance_f32 pid;
     DSP_PID_Init_f32(&pid, 2.9192874f, 1.6070489f, 0.7738435f, 10, 0.01f);
@@ -157,14 +153,10 @@ START_TEST(PID_test_f64)
         order++;
     }
 
-    // Reverse direction
-    DSP_ReverseArray_f64(b, order);
-    DSP_ReverseArray_f64(a, order);
-
-    double* buff = malloc(sizeof(double) * order * 2);
+    double* buff = malloc(sizeof(double) * order);
 
     DSP_IIR_RT_Instance_f64 plant;
-    DSP_IIR_RT_Init_f64(&plant, order - 1, b, a, buff, &buff[order]);
+    DSP_IIR_RT_Init_f64(&plant, order - 1, b, a, buff);
 
     DSP_PID_Instance_f64 pid;
     DSP_PID_Init_f64(&pid, 2.9192874, 1.6070489, 0.7738435, 10, 0.01);

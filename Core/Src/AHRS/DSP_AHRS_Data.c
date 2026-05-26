@@ -1,5 +1,5 @@
 #include "DSP_AHRS_Data.h"
-#include "DSP_SignalFiltering.h"
+#include "DSP_IIR.h"
 #include "DSP_Assert.h"
 
 void DSP_AHRS_DataInit_f32(DSP_AHRS_DataInstance_f32* instance)

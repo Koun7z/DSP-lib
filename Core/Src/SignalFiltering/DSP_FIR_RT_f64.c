@@ -2,38 +2,43 @@
 // Created by pwoli on 23.03.2025.
 //
 
-#include "DSP_SignalFiltering.h"
+#include "DSP_FIR.h"
 
-void DSP_FIR_RT_Init_f64(DSP_FIR_RT_Instance_f64* filter,
-                         size_t filterOrder,
-                         const double* filterCoeffs,
-                         double* pastSamplesBuff)
+#include "DSP_Utils.h"
+#include "DSP_Assert.h"
+
+void DSP_FIR_RT_Init_f64(DSP_FIR_RT_Instance_f64* filter, size_t order, const double* b, double* buff)
 {
-    filter->Coeffs           = filterCoeffs;
-    filter->Order            = filterOrder;
-    filter->_pastSamplesBuff = pastSamplesBuff;
-    for(size_t i = 0; i < filterOrder; i++)
+    DSP_ASSERT(filter && b && buff);
+
+    filter->b     = b;
+    filter->Order = order;
+    filter->_buff = buff;
+    for(size_t i = 0; i < order; i++)
     {
-        pastSamplesBuff[i] = 0.0f;
+        buff[i] = 0.0;
     }
-    filter->_buffPointer = 0;
+    filter->_buffIdx = 0;
 }
 
-double DSP_FIR_RT_Update_f64(DSP_FIR_RT_Instance_f64* filter, const double input)
+double DSP_FIR_RT_Update_f64(DSP_FIR_RT_Instance_f64* filter, const double x)
 {
-    double out = 0.0;
+    DSP_ASSERT(filter);
+    DSP_ASSERT_MSG(filter->b && filter->_buff, "Uninitialized filter instance?");
 
-    size_t buff_ptr = filter->_buffPointer;
+    double y = 0.0;
+
+    size_t idx = filter->_buffIdx;
     for(size_t i = 0; i < filter->Order; i++)
     {
-        out     += filter->_pastSamplesBuff[buff_ptr] * filter->Coeffs[i];
-        buff_ptr = buff_ptr + 1 >= filter->Order ? 0 : buff_ptr + 1;
+        y  += filter->_buff[idx] * filter->b[i];
+        idx = DSP_IncrementIndex(idx, filter->Order);
     }
 
-    out += filter->Coeffs[filter->Order] * input;
+    y += filter->b[filter->Order] * x;
 
-    filter->_pastSamplesBuff[filter->_buffPointer] = input;
-    filter->_buffPointer = filter->_buffPointer + 1 >= filter->Order ? 0 : filter->_buffPointer + 1;
+    filter->_buff[filter->_buffIdx] = x;
+    filter->_buffIdx                = DSP_IncrementIndex(filter->_buffIdx, filter->Order);
 
-    return out;
+    return y;
 }

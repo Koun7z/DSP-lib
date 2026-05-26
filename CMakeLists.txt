@@ -13,7 +13,9 @@ include(${SRC_DIR}/AHRS/Config.cmake)
 
 target_include_directories(DSP-lib PUBLIC
     ${INC_DIR}
-    ${INC_DIR}/AHRS)
+    ${INC_DIR}/AHRS
+    ${INC_DIR}/SignalFiltering
+)
 
 # ---- Tests ----
 option(BUILD_TESTS "Build unit tests (Check + CTest)" OFF)

@@ -8,7 +8,7 @@ pkg_check_modules(CHECK REQUIRED check)
 find_package(Threads REQUIRED)
 
 target_compile_options(DSP-lib PRIVATE
-    -Wall -Wextra
+    -Wall -Wextra -fdiagnostics-color=always
     $<$<CONFIG:Debug>:-O0 -g>
     $<$<CONFIG:Release>:-O3>
 )
@@ -30,6 +30,7 @@ function(add_dsp_test TEST_NAME)
     target_compile_options(${TEST_NAME} PRIVATE
         ${CHECK_CFLAGS_OTHER}
         -Wall -Wextra
+        -fdiagnostics-color=always
     )
 
     target_compile_options(${TEST_NAME} PRIVATE

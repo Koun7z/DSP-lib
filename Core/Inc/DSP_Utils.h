@@ -34,6 +34,11 @@ static inline double DSP_DeadZone_f64(const double x, const double deadZone)
     return fabs(x) < deadZone ? 0.0 : x;
 }
 
+static inline size_t DSP_IncrementIndex(size_t idx, size_t max)
+{
+    return idx + 1 >= max ? 0 : idx + 1;
+}
+
 /**
  * brief		  Reverses elements inside float array (in place)
  * @param[inout] *arr   Array to be reversed

@@ -2,7 +2,7 @@
 #define DSP_ATTITUDE_COMMON_H
 
 #include "DSP_Quaternion.h"
-#include "DSP_SignalFiltering.h"
+#include "DSP_IIR.h"
 
 typedef struct DSP_AHRS_DataInstance_f32
 {
