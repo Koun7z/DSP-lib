@@ -9,6 +9,7 @@ typedef struct DSP_AHRS_DataInstance_f32
     float GyroData[3];
     float AccData[3];
     float MagData[3];
+    float MagRef[3];
 
     DSP_Quaternion_f32 AttitudeEstimate;
 
@@ -18,6 +19,8 @@ typedef struct DSP_AHRS_DataInstance_f32
 } DSP_AHRS_DataInstance_f32;
 
 void DSP_AHRS_DataInit_f32(DSP_AHRS_DataInstance_f32* instance);
+
+void DSP_AHRS_SetMagneticReference_f32(DSP_AHRS_DataInstance_f32* instance, const float magRef[3]);
 
 /**
  * @brief Add filter instances for gyroscope data prefiltering

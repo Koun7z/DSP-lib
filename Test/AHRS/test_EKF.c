@@ -34,14 +34,13 @@ START_TEST(synth_data)
         0.0f, 0.0f, 0.01f
     };
 
-    float acc_noise[3 * 3] =  {   // Process noise covariance
+    float acc_noise[3 * 3] =  {   // Measurement noise covariance
         0.15f, 0.0f, 0.0f,
         0.0f, 0.15f, 0.0f,
         0.0f, 0.0f, 0.15f
     };
     // clang-format on
-    int status = DSP_AHRS_EKF_Init_f32(&ekf_filter, gyro_noise, acc_noise, NULL);
-
+    int status = DSP_AHRS_EKF_InitIMU_f32(&ekf_filter, gyro_noise, acc_noise);
     ck_assert_int_eq(status, 0);
 
     DSP_AHRS_DataInstance_f32 data;
@@ -61,7 +60,7 @@ START_TEST(synth_data)
         data.AccData[1] = test_data[i].AccData[1];
         data.AccData[2] = test_data[i].AccData[2];
 
-        DSP_AHRS_EKF_FilterUpdate_f32(&ekf_filter, &data, 0.01f);
+        DSP_AHRS_EKF_UpdateIMU_f32(&ekf_filter, &data, 0.01f);
         fprintf(fw, "%f,%f,%f,%f\n", data.AttitudeEstimate.r, data.AttitudeEstimate.i, data.AttitudeEstimate.j,
                 data.AttitudeEstimate.k);
 
@@ -109,14 +108,13 @@ START_TEST(RepoIMU_data)
         0.0f, 0.0f, 0.01f
     };
 
-    float acc_noise[3 * 3] =  {   // Process noise covariance
+    float acc_noise[3 * 3] =  {   // Measurement noise covariance
         0.15f, 0.0f, 0.0f,
         0.0f, 0.15f, 0.0f,
         0.0f, 0.0f, 0.15f
     };
     // clang-format on
-    int status = DSP_AHRS_EKF_Init_f32(&ekf_filter, gyro_noise, acc_noise, NULL);
-
+    int status = DSP_AHRS_EKF_InitIMU_f32(&ekf_filter, gyro_noise, acc_noise);
     ck_assert_int_eq(status, 0);
 
     DSP_AHRS_DataInstance_f32 data;
@@ -135,7 +133,7 @@ START_TEST(RepoIMU_data)
         data.AccData[1] = test_data[i].AccData[1];
         data.AccData[2] = test_data[i].AccData[2];
 
-        DSP_AHRS_EKF_FilterUpdate_f32(&ekf_filter, &data, 0.01f);
+        DSP_AHRS_EKF_UpdateIMU_f32(&ekf_filter, &data, 0.01f);
         fprintf(fw, "%f,%f,%f,%f\n", data.AttitudeEstimate.r, data.AttitudeEstimate.i, data.AttitudeEstimate.j,
                 data.AttitudeEstimate.k);
     }

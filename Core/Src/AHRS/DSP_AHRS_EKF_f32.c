@@ -6,16 +6,52 @@
 
 #include <string.h>
 
-int DSP_AHRS_EKF_Init_f32(DSP_AHRS_EKF_Instance_f32* filter,
-                          const float gyroNoise[3 * 3],
-                          const float accNoise[3 * 3],
-                          const float magNoise[3 * 3])
+int DSP_AHRS_EKF_InitIMU_f32(DSP_AHRS_EKF_Instance_f32* filter,
+                             const float gyroNoise[3 * 3],
+                             const float accNoise[3 * 3])
 {
     DSP_ASSERT(filter);
     DSP_ASSERT(gyroNoise);
     DSP_ASSERT(accNoise);
 
-    filter->_useMagnetometer = false;
+    for(size_t i = 0; i < 3; i++)
+    {
+        for(size_t j = 0; j < 3; j++)
+        {
+            filter->GyroNoise[i * 3 + j] = gyroNoise[i * 3 + j];
+            filter->AccNoise[i * 3 + j]  = accNoise[i * 3 + j];
+
+            // Enforce symmetry of noise covariance matrices
+            if(gyroNoise[i * 3 + j] != gyroNoise[j * 3 + i])
+            {
+                return -1;
+            }
+
+            if(accNoise[i * 3 + j] != accNoise[j * 3 + i])
+            {
+                return -1;
+            }
+        }
+    }
+
+    memset(filter->_P, 0, 16 * sizeof(float));
+    filter->_P[0]  = 1.0f;
+    filter->_P[5]  = 1.0f;
+    filter->_P[10] = 1.0f;
+    filter->_P[15] = 1.0f;
+
+    return 0;
+}
+
+int DSP_AHRS_EKF_InitMARG_f32(DSP_AHRS_EKF_Instance_f32* filter,
+                              const float gyroNoise[3 * 3],
+                              const float accNoise[3 * 3],
+                              const float magNoise[3 * 3])
+{
+    DSP_ASSERT(filter);
+    DSP_ASSERT(gyroNoise);
+    DSP_ASSERT(accNoise);
+
     for(size_t i = 0; i < 3; i++)
     {
         for(size_t j = 0; j < 3; j++)
@@ -42,7 +78,6 @@ int DSP_AHRS_EKF_Init_f32(DSP_AHRS_EKF_Instance_f32* filter,
                 {
                     return -1;
                 }
-                filter->_useMagnetometer = true;
             }
         }
     }
@@ -56,7 +91,70 @@ int DSP_AHRS_EKF_Init_f32(DSP_AHRS_EKF_Instance_f32* filter,
     return 0;
 }
 
-void DSP_AHRS_EKF_FilterUpdate_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt)
+int DSP_AHRS_EKF_SetGyroCov_f32(DSP_AHRS_EKF_Instance_f32* filter, const float gyroNoise[3 * 3])
+{
+    DSP_ASSERT(filter);
+    DSP_ASSERT(gyroNoise);
+
+    for(size_t i = 0; i < 3; i++)
+    {
+        for(size_t j = 0; j < 3; j++)
+        {
+            filter->GyroNoise[i * 3 + j] = gyroNoise[i * 3 + j];
+
+            // Enforce symmetry of noise covariance matrices
+            if(gyroNoise[i * 3 + j] != gyroNoise[j * 3 + i])
+            {
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
+
+int DSP_AHRS_EKF_SetAccCov_f32(DSP_AHRS_EKF_Instance_f32* filter, const float accNoise[3 * 3])
+{
+    DSP_ASSERT(filter);
+    DSP_ASSERT(accNoise);
+
+    for(size_t i = 0; i < 3; i++)
+    {
+        for(size_t j = 0; j < 3; j++)
+        {
+            filter->AccNoise[i * 3 + j] = accNoise[i * 3 + j];
+
+            // Enforce symmetry of noise covariance matrices
+            if(accNoise[i * 3 + j] != accNoise[j * 3 + i])
+            {
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
+
+int DSP_AHRS_EKF_SetMagCov_f32(DSP_AHRS_EKF_Instance_f32* filter, const float magNoise[3 * 3])
+{
+    DSP_ASSERT(filter);
+    DSP_ASSERT(magNoise);
+
+    for(size_t i = 0; i < 3; i++)
+    {
+        for(size_t j = 0; j < 3; j++)
+        {
+            filter->MagNoise[i * 3 + j] = magNoise[i * 3 + j];
+
+            // Enforce symmetry of noise covariance matrices
+            if(magNoise[i * 3 + j] != magNoise[j * 3 + i])
+            {
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
+
+void DSP_AHRS_EKF_UpdateIMU_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt)
 {
     const float p = data->GyroData[0];
     const float q = data->GyroData[1];
@@ -120,80 +218,69 @@ void DSP_AHRS_EKF_FilterUpdate_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_D
     ** Correction step
     */
 
-    const float g[3] = {0.0f, 0.0f, 1.0f};
+    // clang-format off
+    // float h_q[3] = {
+    //     2 * q_gyro.i * q_gyro.k - 2 * q_gyro.r * q_gyro.j,
+    //     2 * q_gyro.j * q_gyro.k + 2 * q_gyro.r * q_gyro.i,
+    //     -q_gyro.i * q_gyro.i - q_gyro.j * q_gyro.j + q_gyro.k * q_gyro.k + q_gyro.r * q_gyro.r
+    // };
 
-    if(filter->_useMagnetometer)
+    // y = z - h(x)
+    float y[3] = {a_i - 2 * q_gyro.i * q_gyro.k + 2 * q_gyro.r * q_gyro.j,
+                  a_j - 2 * q_gyro.j * q_gyro.k - 2 * q_gyro.r * q_gyro.i,
+                  a_k + q_gyro.i * q_gyro.i + q_gyro.j * q_gyro.j - q_gyro.k * q_gyro.k - q_gyro.r * q_gyro.r};
+
+    float H[12] = {-2 * q_gyro.j, 2 * q_gyro.k, -2 * q_gyro.r, 2 * q_gyro.i,  2 * q_gyro.i,  2 * q_gyro.r,
+                   2 * q_gyro.k,  2 * q_gyro.j, 2 * q_gyro.r,  -2 * q_gyro.i, -2 * q_gyro.j, 2 * q_gyro.k};
+
+    float H_t[12] = {-2 * q_gyro.j, 2 * q_gyro.i, 2 * q_gyro.r,  2 * q_gyro.k, 2 * q_gyro.r, -2 * q_gyro.i,
+                     -2 * q_gyro.r, 2 * q_gyro.k, -2 * q_gyro.j, 2 * q_gyro.i, 2 * q_gyro.j, 2 * q_gyro.k};
+    // clang-format on
+
+    // S[3x3]
+    float S[3 * 3];
+    DSP_Matrix_SandwichMultiply_f32(S, H, P_hat, 3, 4);
+    DSP_Matrix_AddInplace_f32(S, filter->AccNoise, 3, 3);
+
+    // K[4x3]
+    // K = P * H^T * S^-1
+    // KS = P * H^T
+    float K[4 * 3];
+
+    // PH_T[4x3]
+    float PH_t[4 * 3];
+    DSP_Matrix_Multiply_f32(PH_t, P_hat, 4, 4, H_t, 3);
+
+    size_t LU_P[4];
+    DSP_Matrix_LUPDecompose_f32(S, 3, 1e-6f, LU_P);
+
+    // Right solve for every column of K
+    for(size_t i = 0; i < 4; i++)
     {
-        // float h_q[6];
+        DSP_Matrix_LUPRightSolve_f32(S, LU_P, K + i * 3, PH_t + i * 3, 3);
     }
-    else
-    {
-        // clang-format off
-        
-        // float h_q[3] = {
-        //     2 * q_gyro.i * q_gyro.k - 2 * q_gyro.r * q_gyro.j,                                      
-        //     2 * q_gyro.j * q_gyro.k + 2 * q_gyro.r * q_gyro.i,                                      
-        //     -q_gyro.i * q_gyro.i - q_gyro.j * q_gyro.j + q_gyro.k * q_gyro.k + q_gyro.r * q_gyro.r
-        // };
 
-        // y = z - h(x)
-        float y[3] = {
-            a_i - 2 * q_gyro.i * q_gyro.k + 2 * q_gyro.r * q_gyro.j,                                      
-            a_j - 2 * q_gyro.j * q_gyro.k - 2 * q_gyro.r * q_gyro.i,                                      
-            a_k + q_gyro.i * q_gyro.i + q_gyro.j * q_gyro.j - q_gyro.k * q_gyro.k - q_gyro.r * q_gyro.r
-        };
+    // q = q + K * y
+    DSP_Matrix_Multiply_f32((float*)&data->AttitudeEstimate, K, 4, 3, y, 1);
+    DSP_Matrix_AddInplace_f32((float*)&data->AttitudeEstimate, (float*)&q_gyro, 4, 1);
+    DSP_QT_Normalize_f32(&data->AttitudeEstimate, &data->AttitudeEstimate);
 
-        float H[12] = {
-               -2 * q_gyro.j,  2 * q_gyro.k, -2 * q_gyro.r, 2 * q_gyro.i,
-                2 * q_gyro.i,  2 * q_gyro.r,  2 * q_gyro.k, 2 * q_gyro.j,
-                2 * q_gyro.r, -2 * q_gyro.i, -2 * q_gyro.j, 2 * q_gyro.k
-        };
+    // P = (I - K * H) * P
+    float KH[4 * 4];
+    DSP_Matrix_Multiply_f32(KH, K, 4, 3, H, 4);
+    DSP_Matrix_ScaleInplace_f32(KH, -1.0f, 4, 4);
+    KH[0]  += 1.0f;
+    KH[5]  += 1.0f;
+    KH[10] += 1.0f;
+    KH[15] += 1.0f;
 
-        float H_t[12] = {
-            -2 * q_gyro.j,  2 * q_gyro.i,  2 * q_gyro.r,
-             2 * q_gyro.k,  2 * q_gyro.r, -2 * q_gyro.i,
-            -2 * q_gyro.r,  2 * q_gyro.k, -2 * q_gyro.j,
-             2 * q_gyro.i,  2 * q_gyro.j,  2 * q_gyro.k
-        };
-        // clang-format on
+    DSP_Matrix_Multiply_f32(filter->_P, KH, 4, 4, P_hat, 4);
+}
 
-        // S[3x3]
-        float S[3 * 3];
-        DSP_Matrix_SandwichMultiply_f32(S, H, P_hat, 3, 4);
-        DSP_Matrix_AddInplace_f32(S, filter->AccNoise, 3, 3);
-
-        // K[4x3]
-        // K = P * H^T * S^-1
-        // KS = P * H^T
-        float K[4 * 3];
-
-        // PH_T[4x3]
-        float PH_t[4 * 3];
-        DSP_Matrix_Multiply_f32(PH_t, P_hat, 4, 4, H_t, 3);
-
-        size_t LU_P[4];
-        DSP_Matrix_LUPDecompose_f32(S, 3, 1e-6f, LU_P);
-
-        // Right solve for every column of K
-        for(size_t i = 0; i < 4; i++)
-        {
-            DSP_Matrix_LUPRightSolve_f32(S, LU_P, K + i * 3, PH_t + i * 3, 3);
-        }
-
-        // q = q + K * y
-        DSP_Matrix_Multiply_f32((float*)&data->AttitudeEstimate, K, 4, 3, y, 1);
-        DSP_Matrix_AddInplace_f32((float*)&data->AttitudeEstimate, (float*)&q_gyro, 4, 1);
-        DSP_QT_Normalize_f32(&data->AttitudeEstimate, &data->AttitudeEstimate);
-
-        // P = (I - K * H) * P
-        float KH[4 * 4];
-        DSP_Matrix_Multiply_f32(KH, K, 4, 3, H, 4);
-        DSP_Matrix_Scale_f32(KH, KH, -1.0f, 4, 4);
-        KH[0]  += 1.0f;
-        KH[5]  += 1.0f;
-        KH[10] += 1.0f;
-        KH[15] += 1.0f;
-
-        DSP_Matrix_Multiply_f32(filter->_P, KH, 4, 4, P_hat, 4);
-    }
+void DSP_AHRS_EKF_UpdateMARG_f32(DSP_AHRS_EKF_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt)
+{
+    (void)filter;
+    (void)data;
+    (void)dt;
+    // TODO
 }

@@ -8,14 +8,20 @@ typedef struct
     float Kp;
     float Ki;
 
-    float k_a;
-    float k_m;
+    float _k_a;
+    float _k_m;
 
     float _b[3];
 } DSP_AHRS_Mahony_Instance_f32;
 
-int DSP_AHRS_Mahony_Init_f32(DSP_AHRS_Mahony_Instance_f32* filter, float kp, float ki, float magAccRatio);
+int DSP_AHRS_Mahony_Init_f32(DSP_AHRS_Mahony_Instance_f32* filter, float kp, float ki);
 
-void DSP_AHRS_Mahony_FilterUpdate_f32(DSP_AHRS_Mahony_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt);
+void DSP_AHRS_Mahony_SetGain_f32(DSP_AHRS_Mahony_Instance_f32* filter, float kp, float ki);
+
+void DSP_AHRS_Mahony_SetMagAccRatio_f32(DSP_AHRS_Mahony_Instance_f32* filter, float magAccRatio);
+
+void DSP_AHRS_Mahony_UpdateIMU_f32(DSP_AHRS_Mahony_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt);
+
+void DSP_AHRS_Mahony_UpdateMARG_f32(DSP_AHRS_Mahony_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt);
 
 #endif /* DSP_AHRS_MAHONY_H__ */

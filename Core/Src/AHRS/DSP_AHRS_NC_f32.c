@@ -9,7 +9,28 @@
 #include <math.h>
 #include <float.h>
 
-uint8_t DSP_AHRS_NC_Init_f32(DSP_AHRS_NC_Instance_f32* instance,
+int DSP_AHRS_NC_InitIMU_f32(DSP_AHRS_NC_Instance_f32* instance,
+                            const float AccGain,
+                            const float SLERP_Threshold,
+                            const float AccCutoffLow,
+                            const float AccCutoffHigh)
+{
+    instance->AccGain         = AccGain;
+    instance->MagGain         = 0.0f;
+    instance->SLERP_Threshold = SLERP_Threshold;
+    instance->AccCutoffLow    = AccCutoffLow;
+    instance->AccCutoffHigh   = AccCutoffHigh;
+
+    if(AccCutoffLow < 0 || AccCutoffHigh < 0)
+    {
+        instance->AccCutoffLow  = FLT_MAX;
+        instance->AccCutoffHigh = FLT_MAX;
+    }
+
+    return 0;
+}
+
+int DSP_AHRS_NC_InitMARG_f32(DSP_AHRS_NC_Instance_f32* instance,
                              const float AccGain,
                              const float MagGain,
                              const float SLERP_Threshold,
@@ -24,7 +45,6 @@ uint8_t DSP_AHRS_NC_Init_f32(DSP_AHRS_NC_Instance_f32* instance,
 
     if(AccCutoffLow < 0 || AccCutoffHigh < 0)
     {
-        // TODO: Remove dependency on float.h
         instance->AccCutoffLow  = FLT_MAX;
         instance->AccCutoffHigh = FLT_MAX;
     }
@@ -32,9 +52,28 @@ uint8_t DSP_AHRS_NC_Init_f32(DSP_AHRS_NC_Instance_f32* instance,
     return 0;
 }
 
-void DSP_AHRS_NC_FilterUpdate_f32(const DSP_AHRS_NC_Instance_f32* filter,
-                                  DSP_AHRS_DataInstance_f32* data,
-                                  const float dt)
+void DSP_AHRS_NC_SetAccGain_f32(DSP_AHRS_NC_Instance_f32* filter, float AccGain)
+{
+    filter->AccGain = AccGain;
+}
+
+void DSP_AHRS_NC_SetMagGain_f32(DSP_AHRS_NC_Instance_f32* filter, float MagGain)
+{
+    filter->MagGain = MagGain;
+}
+
+void DSP_AHRS_NC_SetSLERPThreshold_f32(DSP_AHRS_NC_Instance_f32* filter, float SLERP_Threshold)
+{
+    filter->SLERP_Threshold = SLERP_Threshold;
+}
+
+void DSP_AHRS_NC_SetAccCutoff_f32(DSP_AHRS_NC_Instance_f32* filter, float AccCutoffLow, float AccCutoffHigh)
+{
+    filter->AccCutoffLow  = AccCutoffLow;
+    filter->AccCutoffHigh = AccCutoffHigh;
+}
+
+void DSP_AHRS_NC_UpdateIMU_f32(const DSP_AHRS_NC_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, const float dt)
 {
     const float p = data->GyroData[0];
     const float q = data->GyroData[1];
@@ -58,6 +97,93 @@ void DSP_AHRS_NC_FilterUpdate_f32(const DSP_AHRS_NC_Instance_f32* filter,
     DSP_QT_Add_f32(&q_gyro, &data->AttitudeEstimate, &delta_q_gyro);
     DSP_QT_Normalize_f32(&q_gyro, &q_gyro);  // TODO: Check effect of this normalization
 
+    // Calculating predicted gravity vector
+    float g_pred[3] = {a_i, a_j, a_k};
+    DSP_QT_RotateVector_f32(g_pred, g_pred, &q_gyro);
+
+    // Calculating accelerometer correction
+    DSP_Quaternion_f32 delta_q_acc;
+    if(g_pred[2] >= 0.0f)
+    {
+        const float sq_gk = sqrtf(2.0f * (g_pred[2] + 1.0f));
+
+        delta_q_acc.r = sqrtf((g_pred[2] + 1.0f) / 2.0f);
+        delta_q_acc.i = g_pred[1] / sq_gk;
+        delta_q_acc.j = -g_pred[0] / sq_gk;
+        delta_q_acc.k = 0.0f;
+    }
+    else
+    {
+        const float sq_gk = sqrtf(2.0f * (1.0f - g_pred[2]));
+
+        delta_q_acc.r = -g_pred[1] / sq_gk;
+        delta_q_acc.i = -sqrtf((1.0f - g_pred[2]) / 2.0f);
+        delta_q_acc.j = 0.0f;
+        delta_q_acc.k = -g_pred[0] / sq_gk;
+    }
+
+    // Simple adaptive gain
+    float acc_gain      = filter->AccGain;
+    const float acc_err = fabsf(acc_norm - 1.0f);
+
+    if(acc_err > filter->AccCutoffHigh)
+    {
+        acc_gain = 0.0f;
+    }
+    else if(acc_err > filter->AccCutoffLow)
+    {
+        acc_gain *= (filter->AccCutoffHigh - acc_err) / (filter->AccCutoffHigh - filter->AccCutoffLow);
+    }
+
+    // Applying gain to accelerometer correction
+
+    // TODO: Remove the slerp branch all together?? When last testing i didn't see it enter this branch at all.
+    // Maybe for very low update frequency, very high gain
+    if(delta_q_acc.r > filter->SLERP_Threshold)
+    {
+        DSP_QT_Scale_f32(&delta_q_acc, &delta_q_acc, acc_gain);
+        delta_q_acc.r += 1.0f - acc_gain;
+    }
+    else
+    {
+        const float omega_slerp = acosf(delta_q_acc.r);
+        const float sin_om      = sinf(omega_slerp);
+
+        const float scale = sinf(acc_gain * omega_slerp) / sin_om;
+        DSP_QT_Scale_f32(&delta_q_acc, &delta_q_acc, scale);
+
+        delta_q_acc.r += sinf((1.0f - acc_gain) * omega_slerp) / sin_om;
+    }
+
+    // Applying accelerometer correction
+    DSP_QT_Multiply_f32(&data->AttitudeEstimate, &delta_q_acc, &q_gyro);
+    DSP_QT_Normalize_f32(&data->AttitudeEstimate, &data->AttitudeEstimate);
+}
+
+
+void DSP_AHRS_NC_UpdateMARG_f32(const DSP_AHRS_NC_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, const float dt)
+{
+    const float p = data->GyroData[0];
+    const float q = data->GyroData[1];
+    const float r = data->GyroData[2];
+
+    float acc_data[3]    = {data->AccData[0], data->AccData[1], data->AccData[2]};
+    const float acc_norm = DSP_Vector_Normalize_f32(acc_data, 3);
+    const float a_i      = acc_data[0];
+    const float a_j      = acc_data[1];
+    const float a_k      = acc_data[2];
+
+    // Integrating local angular velocity
+    const DSP_Quaternion_f32 omega_l = {.r = 0.0f, .i = p, .j = q, .k = r};
+
+    DSP_Quaternion_f32 delta_q_gyro;
+    DSP_QT_Multiply_f32(&delta_q_gyro, &data->AttitudeEstimate, &omega_l);
+    DSP_QT_Scale_f32(&delta_q_gyro, &delta_q_gyro, 0.5f * dt);
+
+    DSP_Quaternion_f32 q_gyro;
+
+    DSP_QT_Add_f32(&q_gyro, &data->AttitudeEstimate, &delta_q_gyro);
+    DSP_QT_Normalize_f32(&q_gyro, &q_gyro);  // TODO: Check effect of this normalization
 
     // Calculating predicted gravity vector
     float g_pred[3] = {a_i, a_j, a_k};

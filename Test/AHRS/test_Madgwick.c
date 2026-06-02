@@ -28,7 +28,7 @@ START_TEST(synth_data)
     }
 
     DSP_AHRS_Madgwick_Instance_f32 madgwick_filter;
-    DSP_AHRS_Madgwick_Init_f32(&madgwick_filter, 0.1f, false);
+    DSP_AHRS_Madgwick_Init_f32(&madgwick_filter, 0.1f);
 
     DSP_AHRS_DataInstance_f32 data;
     DSP_AHRS_DataInit_f32(&data);
@@ -48,7 +48,7 @@ START_TEST(synth_data)
         data.AccData[1] = test_data[i].AccData[1];
         data.AccData[2] = test_data[i].AccData[2];
 
-        DSP_AHRS_Madgwick_FilterUpdate_f32(&madgwick_filter, &data, 0.01f);
+        DSP_AHRS_Madgwick_UpdateIMU_f32(&madgwick_filter, &data, 0.01f);
         fprintf(fw, "%f,%f,%f,%f\n", data.AttitudeEstimate.r, data.AttitudeEstimate.i, data.AttitudeEstimate.j,
                 data.AttitudeEstimate.k);
 
@@ -90,7 +90,7 @@ START_TEST(RepoIMU_data)
     }
 
     DSP_AHRS_Madgwick_Instance_f32 madgwick_filter;
-    DSP_AHRS_Madgwick_Init_f32(&madgwick_filter, 0.1f, false);
+    DSP_AHRS_Madgwick_Init_f32(&madgwick_filter, 0.1f);
 
     DSP_AHRS_DataInstance_f32 data;
     DSP_AHRS_DataInit_f32(&data);
@@ -108,7 +108,7 @@ START_TEST(RepoIMU_data)
         data.AccData[1] = test_data[i].AccData[1];
         data.AccData[2] = test_data[i].AccData[2];
 
-        DSP_AHRS_Madgwick_FilterUpdate_f32(&madgwick_filter, &data, 0.01f);
+        DSP_AHRS_Madgwick_UpdateIMU_f32(&madgwick_filter, &data, 0.01f);
         fprintf(fw, "%f,%f,%f,%f\n", data.AttitudeEstimate.r, data.AttitudeEstimate.i, data.AttitudeEstimate.j,
                 data.AttitudeEstimate.k);
     }

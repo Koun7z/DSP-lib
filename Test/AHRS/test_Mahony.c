@@ -8,7 +8,7 @@
 
 #define BASE_BLOCK_SIZE 128
 
-START_TEST(synth_no_noise)
+START_TEST(imu_synth_no_noise)
 {
     const char* input_path  = "./python/data/ahrs_synth_data.csv";
     const char* output_path = "./python/data/ahrs_mahony_synth_output.csv";
@@ -27,7 +27,7 @@ START_TEST(synth_no_noise)
     }
 
     DSP_AHRS_Mahony_Instance_f32 mahony_filter;
-    DSP_AHRS_Mahony_Init_f32(&mahony_filter, 1.0f, 0.3f, 0.0f);
+    DSP_AHRS_Mahony_Init_f32(&mahony_filter, 1.0f, 0.3f);
 
     DSP_AHRS_DataInstance_f32 data;
     DSP_AHRS_DataInit_f32(&data);
@@ -46,7 +46,7 @@ START_TEST(synth_no_noise)
         data.AccData[1] = test_data[i].AccData[1];
         data.AccData[2] = test_data[i].AccData[2];
 
-        DSP_AHRS_Mahony_FilterUpdate_f32(&mahony_filter, &data, 0.01f);
+        DSP_AHRS_Mahony_UpdateIMU_f32(&mahony_filter, &data, 0.01f);
         fprintf(fw, "%f,%f,%f,%f\n", data.AttitudeEstimate.r, data.AttitudeEstimate.i, data.AttitudeEstimate.j,
                 data.AttitudeEstimate.k);
 
@@ -68,7 +68,7 @@ START_TEST(synth_no_noise)
     ck_assert_msg(passed, "Mahony AHRS output saved to %s", full_out_path);
 }
 
-START_TEST(RepoIMU_data)
+START_TEST(RepoIMU_imu_data)
 {
     const char* input_path  = "./Test/RepoIMU/TStick/TStick_Test02_Trial1.csv";
     const char* output_path = "./python/data/ahrs_mahony_RepoIMU_output.csv";
@@ -87,7 +87,7 @@ START_TEST(RepoIMU_data)
     }
 
     DSP_AHRS_Mahony_Instance_f32 mahony_filter;
-    DSP_AHRS_Mahony_Init_f32(&mahony_filter, 1.0f, 0.3f, 0.0f);
+    DSP_AHRS_Mahony_Init_f32(&mahony_filter, 1.0f, 0.3f);
 
     DSP_AHRS_DataInstance_f32 data;
     DSP_AHRS_DataInit_f32(&data);
@@ -105,7 +105,7 @@ START_TEST(RepoIMU_data)
         data.AccData[1] = test_data[i].AccData[1];
         data.AccData[2] = test_data[i].AccData[2];
 
-        DSP_AHRS_Mahony_FilterUpdate_f32(&mahony_filter, &data, 0.01f);
+        DSP_AHRS_Mahony_UpdateIMU_f32(&mahony_filter, &data, 0.01f);
         fprintf(fw, "%f,%f,%f,%f\n", data.AttitudeEstimate.r, data.AttitudeEstimate.i, data.AttitudeEstimate.j,
                 data.AttitudeEstimate.k);
     }
@@ -118,6 +118,6 @@ START_TEST(RepoIMU_data)
 
 __attribute__((constructor)) void register_mahony_tests()
 {
-    tr_add_test("AHRS", "Mahony", RepoIMU_data);
-    tr_add_test("AHRS", "Mahony", synth_no_noise);
+    tr_add_test("AHRS", "Mahony", RepoIMU_imu_data);
+    tr_add_test("AHRS", "Mahony", imu_synth_no_noise);
 }

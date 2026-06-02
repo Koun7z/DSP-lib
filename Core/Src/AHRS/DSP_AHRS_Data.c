@@ -23,6 +23,13 @@ void DSP_AHRS_DataInit_f32(DSP_AHRS_DataInstance_f32* instance)
     instance->_magFilters  = NULL;
 }
 
+void DSP_AHRS_SetMagneticReference_f32(DSP_AHRS_DataInstance_f32* instance, const float magRef[3])
+{
+    instance->MagRef[0] = magRef[0];
+    instance->MagRef[1] = magRef[1];
+    instance->MagRef[2] = magRef[2];
+}
+
 void DSP_AHRS_AddGyroFilters_f32(DSP_AHRS_DataInstance_f32* instance, DSP_IIR_RT_Instance_f32 gyroFilter[3])
 {
     instance->_gyroFilters = gyroFilter;
