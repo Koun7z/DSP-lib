@@ -65,7 +65,7 @@ void DSP_AHRS_Madgwick_UpdateIMU_f32(DSP_AHRS_Madgwick_Instance_f32* filter, DSP
     const float q_jj = q_j * q_j;
 
     // clang-format off
-    float f_g[3] = {
+    const float  f_g[3] = {
         2 * (q_i  * q_k  - q_r  * q_j) - a_i,
         2 * (q_r  * q_i  + q_j  * q_k) - a_j,
         2 * (0.5f - q_ii - q_jj)    - a_k,
@@ -77,22 +77,26 @@ void DSP_AHRS_Madgwick_UpdateIMU_f32(DSP_AHRS_Madgwick_Instance_f32* filter, DSP
     //     0.0f, -4*x, -4*y,  0.0f
     // };
 
-    float J_gT[4 * 3] = {
-        -2*q_j,  2*q_i,   0.0f,
-         2*q_k,  2*q_r, -4*q_i,
-        -2*q_r,  2*q_k, -4*q_j,
-         2*q_i,  2*q_j,   0.0f
+    // const float J_gT[4 * 3] = {
+    //     -2*q_j,  2*q_i,   0.0f,
+    //      2*q_k,  2*q_r, -4*q_i,
+    //     -2*q_r,  2*q_k, -4*q_j,
+    //      2*q_i,  2*q_j,   0.0f
+    // };
+
+    DSP_Quaternion_f32 grad = {
+        .r = -2 * q_j * f_g[0] + 2 * q_i * f_g[1] +     0.0f * f_g[2],
+        .i =  2 * q_k * f_g[0] + 2 * q_r * f_g[1] + -4 * q_i * f_g[2],
+        .j = -2 * q_r * f_g[0] + 2 * q_k * f_g[1] + -4 * q_j * f_g[2],
+        .k =  2 * q_i * f_g[0] + 2 * q_j * f_g[1] +     0.0f * f_g[2],
     };
     // clang-format on
 
-    float grad[4];
-    DSP_Matrix_Multiply_f32(grad, J_gT, 4, 3, f_g, 1);
-
-    DSP_Vector_Normalize_f32(grad, 4);
-    data->AttitudeEstimate.r += (delta_q_gyro.r - filter->_beta * grad[0]) * dt;
-    data->AttitudeEstimate.i += (delta_q_gyro.i - filter->_beta * grad[1]) * dt;
-    data->AttitudeEstimate.j += (delta_q_gyro.j - filter->_beta * grad[2]) * dt;
-    data->AttitudeEstimate.k += (delta_q_gyro.k - filter->_beta * grad[3]) * dt;
+    DSP_QT_Normalize_f32(&grad, &grad);
+    data->AttitudeEstimate.r += (delta_q_gyro.r - filter->_beta * grad.r) * dt;
+    data->AttitudeEstimate.i += (delta_q_gyro.i - filter->_beta * grad.i) * dt;
+    data->AttitudeEstimate.j += (delta_q_gyro.j - filter->_beta * grad.j) * dt;
+    data->AttitudeEstimate.k += (delta_q_gyro.k - filter->_beta * grad.k) * dt;
 
     DSP_QT_Normalize_f32(&data->AttitudeEstimate, &data->AttitudeEstimate);
 }

@@ -61,8 +61,8 @@ static inline void dsp_bench_init(void)
         static uint64_t __f_total_runtime__ = 0;                                                                   \
         static uint64_t __f_call_counter__  = 0;                                                                   \
         static uint64_t __f_max_runtime__   = 0;                                                                   \
-                                                                                                                   \
-        uint64_t start = DSP_BENCH_GET_TICK();                                                                     \
+        static uint64_t __f_min_runtime__   = UINT64_MAX;                                                          \
+        uint64_t start                      = DSP_BENCH_GET_TICK();                                                \
         (__f__);                                                                                                   \
         uint64_t end = DSP_BENCH_GET_TICK();                                                                       \
                                                                                                                    \
@@ -74,17 +74,22 @@ static inline void dsp_bench_init(void)
         {                                                                                                          \
             __f_max_runtime__ = runtime;                                                                           \
         }                                                                                                          \
-                                                                                                                   \
+        if(runtime < __f_min_runtime__)                                                                            \
+        {                                                                                                          \
+            __f_min_runtime__ = runtime;                                                                           \
+        }                                                                                                          \
         if(__f_call_counter__ >= (__avg_over_n__))                                                                 \
         {                                                                                                          \
             float avg_us = ((float)__f_total_runtime__ / __f_call_counter__) / (float)DSP_BENCH_TICK_RESOLUTION_HZ \
                          * 1e6f;                                                                                   \
             float max_us = ((float)__f_max_runtime__) / (float)DSP_BENCH_TICK_RESOLUTION_HZ * 1e6f;                \
-            printf("Runtime of %s: avg - %f us, max - %f us\n", #__f__, avg_us, max_us);                           \
+            float min_us = ((float)__f_min_runtime__) / (float)DSP_BENCH_TICK_RESOLUTION_HZ * 1e6f;                \
+            printf("Runtime of %s: avg - %f us, max - %f us, min - %f us\n", #__f__, avg_us, max_us, min_us);      \
                                                                                                                    \
             __f_total_runtime__ = 0;                                                                               \
             __f_call_counter__  = 0;                                                                               \
             __f_max_runtime__   = 0;                                                                               \
+            __f_min_runtime__   = UINT64_MAX;                                                                      \
         }                                                                                                          \
     }                                                                                                              \
     while(0)
