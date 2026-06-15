@@ -8,11 +8,15 @@
 typedef struct
 {
     float _beta;
+    float _zeta;
+    float _b[3];
 } DSP_AHRS_Madgwick_Instance_f32;
 
-int DSP_AHRS_Madgwick_Init_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta);
+int DSP_AHRS_Madgwick_InitIMU_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta);
 
-void DSP_AHRS_Madgwick_SetGain_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta);
+int DSP_AHRS_Madgwick_InitMARG_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta, float zeta);
+
+void DSP_AHRS_Madgwick_SetGain_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta, float zeta);
 
 void DSP_AHRS_Madgwick_UpdateIMU_f32(DSP_AHRS_Madgwick_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt);
 

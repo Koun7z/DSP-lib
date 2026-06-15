@@ -2,78 +2,66 @@
 // Created by pwoli on 18.03.2025.
 //
 
-#include "DSP_AHRS_NC.h"
+#include "DSP_AHRS_AQUA.h"
 
+#include "DSP_AHRS_Common.h"
 #include "DSP_Vector.h"
 
 #include <math.h>
 #include <float.h>
 
-int DSP_AHRS_NC_InitIMU_f32(DSP_AHRS_NC_Instance_f32* instance,
-                            const float AccGain,
-                            const float SLERP_Threshold,
-                            const float AccCutoffLow,
-                            const float AccCutoffHigh)
+int DSP_AHRS_AQUA_InitIMU_f32(DSP_AHRS_AQUA_Instance_f32* filter, const float AccGain)
 {
-    instance->AccGain         = AccGain;
-    instance->MagGain         = 0.0f;
-    instance->SLERP_Threshold = SLERP_Threshold;
-    instance->AccCutoffLow    = AccCutoffLow;
-    instance->AccCutoffHigh   = AccCutoffHigh;
-
-    if(AccCutoffLow < 0 || AccCutoffHigh < 0)
-    {
-        instance->AccCutoffLow  = FLT_MAX;
-        instance->AccCutoffHigh = FLT_MAX;
-    }
+    filter->AccGain         = AccGain;
+    filter->MagGain         = 0.0f;
+    filter->SLERP_Threshold = 0.9f;
+    filter->AccCutoffLow    = FLT_MAX;
+    filter->AccCutoffHigh   = FLT_MAX;
 
     return 0;
 }
 
-int DSP_AHRS_NC_InitMARG_f32(DSP_AHRS_NC_Instance_f32* instance,
-                             const float AccGain,
-                             const float MagGain,
-                             const float SLERP_Threshold,
-                             const float AccCutoffLow,
-                             const float AccCutoffHigh)
+int DSP_AHRS_AQUA_InitMARG_f32(DSP_AHRS_AQUA_Instance_f32* filter, const float AccGain, const float MagGain)
 {
-    instance->AccGain         = AccGain;
-    instance->MagGain         = MagGain;
-    instance->SLERP_Threshold = SLERP_Threshold;
-    instance->AccCutoffLow    = AccCutoffLow;
-    instance->AccCutoffHigh   = AccCutoffHigh;
-
-    if(AccCutoffLow < 0 || AccCutoffHigh < 0)
-    {
-        instance->AccCutoffLow  = FLT_MAX;
-        instance->AccCutoffHigh = FLT_MAX;
-    }
+    filter->AccGain         = AccGain;
+    filter->MagGain         = MagGain;
+    filter->SLERP_Threshold = 0.9f;
+    filter->AccCutoffLow    = FLT_MAX;
+    filter->AccCutoffHigh   = FLT_MAX;
 
     return 0;
 }
 
-void DSP_AHRS_NC_SetAccGain_f32(DSP_AHRS_NC_Instance_f32* filter, float AccGain)
+void DSP_AHRS_AQUA_SetAccGain_f32(DSP_AHRS_AQUA_Instance_f32* filter, float AccGain)
 {
     filter->AccGain = AccGain;
 }
 
-void DSP_AHRS_NC_SetMagGain_f32(DSP_AHRS_NC_Instance_f32* filter, float MagGain)
+void DSP_AHRS_AQUA_SetMagGain_f32(DSP_AHRS_AQUA_Instance_f32* filter, float MagGain)
 {
     filter->MagGain = MagGain;
 }
 
-void DSP_AHRS_NC_SetSLERPThreshold_f32(DSP_AHRS_NC_Instance_f32* filter, float SLERP_Threshold)
+void DSP_AHRS_AQUA_SetSLERPThreshold_f32(DSP_AHRS_AQUA_Instance_f32* filter, float SLERP_Threshold)
 {
     filter->SLERP_Threshold = SLERP_Threshold;
 }
 
-void DSP_AHRS_NC_SetAccCutoff_f32(DSP_AHRS_NC_Instance_f32* filter, float AccCutoffLow, float AccCutoffHigh)
+void DSP_AHRS_AQUA_SetAccCutoff_f32(DSP_AHRS_AQUA_Instance_f32* filter, float AccCutoffLow, float AccCutoffHigh)
 {
+    if(AccCutoffLow < 0 || AccCutoffHigh < 0)
+    {
+        filter->AccCutoffLow  = FLT_MAX;
+        filter->AccCutoffHigh = FLT_MAX;
+    }
+
     filter->AccCutoffLow  = AccCutoffLow;
     filter->AccCutoffHigh = AccCutoffHigh;
 }
 
-void DSP_AHRS_NC_UpdateIMU_f32(const DSP_AHRS_NC_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, const float dt)
+void DSP_AHRS_AQUA_UpdateIMU_f32(const DSP_AHRS_AQUA_Instance_f32* filter,
+                                 DSP_AHRS_DataInstance_f32* data,
+                                 const float dt)
 {
     const float p = data->GyroData[0];
     const float q = data->GyroData[1];
@@ -161,7 +149,9 @@ void DSP_AHRS_NC_UpdateIMU_f32(const DSP_AHRS_NC_Instance_f32* filter, DSP_AHRS_
 }
 
 
-void DSP_AHRS_NC_UpdateMARG_f32(const DSP_AHRS_NC_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, const float dt)
+void DSP_AHRS_AQUA_UpdateMARG_f32(const DSP_AHRS_AQUA_Instance_f32* filter,
+                                  DSP_AHRS_DataInstance_f32* data,
+                                  const float dt)
 {
     const float p = data->GyroData[0];
     const float q = data->GyroData[1];
@@ -211,22 +201,9 @@ void DSP_AHRS_NC_UpdateMARG_f32(const DSP_AHRS_NC_Instance_f32* filter, DSP_AHRS
     }
 
     // Simple adaptive gain
-    float acc_gain      = filter->AccGain;
-    const float acc_err = fabsf(acc_norm - 1.0f);
-
-    if(acc_err > filter->AccCutoffHigh)
-    {
-        acc_gain = 0.0f;
-    }
-    else if(acc_err > filter->AccCutoffLow)
-    {
-        acc_gain *= (filter->AccCutoffHigh - acc_err) / (filter->AccCutoffHigh - filter->AccCutoffLow);
-    }
+    float acc_gain = filter->AccGain * DSP_AHRS_GainFactor_f32(acc_norm, filter->AccCutoffLow, filter->AccCutoffHigh);
 
     // Applying gain to accelerometer correction
-
-    // TODO: Remove the slerp branch all together?? When last testing i didn't see it enter this branch at all.
-    // Maybe for very low update frequency, very high gain
     if(delta_q_acc.r > filter->SLERP_Threshold)
     {
         DSP_QT_Scale_f32(&delta_q_acc, &delta_q_acc, acc_gain);

@@ -16,7 +16,9 @@ void DSP_AHRS_DataInit_f32(DSP_AHRS_DataInstance_f32* instance)
     instance->MagData[1] = 0.0f;
     instance->MagData[2] = 0.0f;
 
-    instance->AttitudeEstimate = (DSP_Quaternion_f32) {1, 0, 0, 0};  // Identity quaternion
+    instance->AttitudeEstimate = (DSP_Quaternion_f32) {
+        {1, 0, 0, 0}
+    };  // Identity quaternion
 
     instance->_gyroFilters = NULL;
     instance->_accFilters  = NULL;

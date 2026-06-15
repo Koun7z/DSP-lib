@@ -4,8 +4,12 @@
 
 START_TEST(multiplication_test)
 {
-    DSP_Quaternion_f32 q1 = {1.0f, 2.0f, 3.0f, 4.0f};
-    DSP_Quaternion_f32 q2 = {5.0f, 6.0f, 7.0f, 8.0f};
+    DSP_Quaternion_f32 q1 = {
+        {1.0f, 2.0f, 3.0f, 4.0f}
+    };
+    DSP_Quaternion_f32 q2 = {
+        {5.0f, 6.0f, 7.0f, 8.0f}
+    };
 
 
     DSP_Quaternion_f32 result;

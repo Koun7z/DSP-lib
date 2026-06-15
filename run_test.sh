@@ -102,9 +102,7 @@ fi
 if [[ "$RUN_BENCH" == true ]]; then
   log_info "Running benchmarks."
   BUILD_TYPE="Release"
-fi
 
-if [[ "$RUN_BENCH" == true ]]; then
   log_info "Running benchmarks."
 
   "./build/${BUILD_TYPE}/dsp-bench"

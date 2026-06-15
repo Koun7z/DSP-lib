@@ -12,7 +12,17 @@
  * @param rows
  * @param cols
  */
-void DSP_Matrix_Add_f32(float* __restrict result, const float* A, const float* B, size_t row, size_t col);
+static inline void DSP_Matrix_Add_f32(float* __restrict result,
+                                      const float* A,
+                                      const float* B,
+                                      size_t rows,
+                                      size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] = A[i] + B[i];
+    }
+}
 
 /**
  * @brief result += A
@@ -22,7 +32,14 @@ void DSP_Matrix_Add_f32(float* __restrict result, const float* A, const float* B
  * @param rows
  * @param cols
  */
-void DSP_Matrix_AddInplace_f32(float* __restrict result, const float* A, size_t rows, size_t cols);
+static inline void DSP_Matrix_AddInplace_f32(float* __restrict result, const float* A, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] += A[i];
+    }
+}
+
 
 /**
  * @brief result = A - B
@@ -33,7 +50,17 @@ void DSP_Matrix_AddInplace_f32(float* __restrict result, const float* A, size_t 
  * @param rows
  * @param cols
  */
-void DSP_Matrix_Subtract_f32(float* __restrict result, const float* A, const float* B, size_t rows, size_t cols);
+static inline void DSP_Matrix_Subtract_f32(float* __restrict result,
+                                           const float* A,
+                                           const float* B,
+                                           size_t rows,
+                                           size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] = A[i] - B[i];
+    }
+}
 
 /**
  * @brief result -= A
@@ -43,7 +70,13 @@ void DSP_Matrix_Subtract_f32(float* __restrict result, const float* A, const flo
  * @param rows
  * @param cols
  */
-void DSP_Matrix_SubtractInplace_f32(float* result, const float* A, size_t rows, size_t cols);
+static inline void DSP_Matrix_SubtractInplace_f32(float* result, const float* A, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] -= A[i];
+    }
+}
 
 /**
  * @brief result = A * B
@@ -63,13 +96,20 @@ void DSP_Matrix_Multiply_f32(float* __restrict result,
  * @brief Performs an operation of the form result = A * B * A^T.
  *        A is a M x N matrix, B is a N x N matrix, and result is a M x M matrix.
  *
+ * @note  Performing two multiplications and transposition manually is ~2-4 times faster
+ *        Use this one only if you care more about not allocating temporary buffers.
+ *
  * @param result
  * @param A
  * @param B
  * @param M
  * @param N
  */
-void DSP_Matrix_SandwichMultiply_f32(float* __restrict result, const float* A, const float* B, size_t M, size_t N);
+void DSP_Matrix_SandwichMultiply_f32(float* __restrict result,
+                                     const float* __restrict A,
+                                     const float* __restrict B,
+                                     size_t M,
+                                     size_t N);
 
 /**
  * @brief result = sA
@@ -80,7 +120,13 @@ void DSP_Matrix_SandwichMultiply_f32(float* __restrict result, const float* A, c
  * @param rows
  * @param cols
  */
-void DSP_Matrix_Scale_f32(float* __restrict result, const float* A, float s, size_t rows, size_t cols);
+static inline void DSP_Matrix_Scale_f32(float* __restrict result, const float* A, float s, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] = A[i] * s;
+    }
+}
 
 /**
  * @brief result *= s;
@@ -90,7 +136,13 @@ void DSP_Matrix_Scale_f32(float* __restrict result, const float* A, float s, siz
  * @param rows
  * @param cols
  */
-void DSP_Matrix_ScaleInplace_f32(float* result, float s, size_t rows, size_t cols);
+static inline void DSP_Matrix_ScaleInplace_f32(float* result, float s, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] *= s;
+    }
+}
 
 /**
  * @brief result = A .* B (Element-wise multiplication)
@@ -99,7 +151,17 @@ void DSP_Matrix_ScaleInplace_f32(float* result, float s, size_t rows, size_t col
  * @param A
  * @param B
  */
-void DSP_Matrix_MultiplyElems_f32(float* __restrict result, const float* A, const float* B, size_t rows, size_t cols);
+static inline void DSP_Matrix_MultiplyElems_f32(float* __restrict result,
+                                                const float* A,
+                                                const float* B,
+                                                size_t rows,
+                                                size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] = A[i] * B[i];
+    }
+}
 
 /**
  * @brief result = result .* A (Element-wise multiplication)
@@ -109,7 +171,13 @@ void DSP_Matrix_MultiplyElems_f32(float* __restrict result, const float* A, cons
  * @param rows
  * @param cols
  */
-void DSP_Matrix_MultiplyElemsInplace_f32(float* result, const float* A, size_t rows, size_t cols);
+static inline void DSP_Matrix_MultiplyElemsInplace_f32(float* result, const float* A, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] *= A[i];
+    }
+}
 
 /**
  * @brief result = A^T
@@ -119,7 +187,7 @@ void DSP_Matrix_MultiplyElemsInplace_f32(float* result, const float* A, size_t r
  * @param rows
  * @param cols
  */
-void DSP_Matrix_Transpose_f32(float* __restrict result, const float* M, size_t rows, size_t cols);
+void DSP_Matrix_Transpose_f32(float* __restrict result, const float* __restrict M, size_t rows, size_t cols);
 
 /**
  * @brief M = M^T (In-place transpose for N x N matrix)
@@ -129,7 +197,14 @@ void DSP_Matrix_Transpose_f32(float* __restrict result, const float* M, size_t r
  */
 void DSP_Matrix_TransposeInplace_f32(float* A, size_t N);
 
-
+/**
+ * @brief Swap two rows of a matrix A in-place.
+ *
+ * @param A
+ * @param r1
+ * @param r2
+ * @param cols
+ */
 static inline void DSP_Matrix_SwapRows_f32(float* A, size_t r1, size_t r2, size_t cols)
 {
     float* a = A + r1 * cols;
@@ -217,7 +292,17 @@ float DSP_Matrix_LUPDeterminant_f32(const float* LU, const size_t* P, size_t N);
  * @param rows
  * @param cols
  */
-void DSP_Matrix_Add_f64(double* __restrict result, const double* A, const double* B, size_t row, size_t col);
+static inline void DSP_Matrix_Add_f64(double* __restrict result,
+                                      const double* A,
+                                      const double* B,
+                                      size_t rows,
+                                      size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] = A[i] + B[i];
+    }
+}
 
 /**
  * @brief result += A
@@ -227,7 +312,13 @@ void DSP_Matrix_Add_f64(double* __restrict result, const double* A, const double
  * @param rows
  * @param cols
  */
-void DSP_Matrix_AddInplace_f64(double* __restrict result, const double* A, size_t rows, size_t cols);
+static inline void DSP_Matrix_AddInplace_f64(double* __restrict result, const double* A, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] += A[i];
+    }
+}
 
 /**
  * @brief result = A - B
@@ -238,7 +329,17 @@ void DSP_Matrix_AddInplace_f64(double* __restrict result, const double* A, size_
  * @param rows
  * @param cols
  */
-void DSP_Matrix_Subtract_f64(double* __restrict result, const double* A, const double* B, size_t rows, size_t cols);
+static inline void DSP_Matrix_Subtract_f64(double* __restrict result,
+                                           const double* A,
+                                           const double* B,
+                                           size_t rows,
+                                           size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] = A[i] - B[i];
+    }
+}
 
 /**
  * @brief result -= A
@@ -248,7 +349,13 @@ void DSP_Matrix_Subtract_f64(double* __restrict result, const double* A, const d
  * @param rows
  * @param cols
  */
-void DSP_Matrix_SubtractInplace_f64(double* __restrict result, const double* A, size_t rows, size_t cols);
+static inline void DSP_Matrix_SubtractInplace_f64(double* __restrict result, const double* A, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] -= A[i];
+    }
+}
 
 /**
  * @brief result = A * B
@@ -285,7 +392,13 @@ void DSP_Matrix_SandwichMultiply_f64(double* __restrict result, const double* A,
  * @param rows
  * @param cols
  */
-void DSP_Matrix_Scale_f64(double* __restrict result, const double* A, double s, size_t rows, size_t cols);
+static inline void DSP_Matrix_Scale_f64(double* __restrict result, const double* A, double s, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] = A[i] * s;
+    }
+}
 
 /**
  * @brief result *= s;
@@ -295,7 +408,13 @@ void DSP_Matrix_Scale_f64(double* __restrict result, const double* A, double s, 
  * @param rows
  * @param cols
  */
-void DSP_Matrix_ScaleInplace_f64(double* __restrict result, double s, size_t rows, size_t cols);
+static inline void DSP_Matrix_ScaleInplace_f64(double* result, double s, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] *= s;
+    }
+}
 
 /**
  * @brief result = A .* B (Element-wise multiplication)
@@ -304,11 +423,17 @@ void DSP_Matrix_ScaleInplace_f64(double* __restrict result, double s, size_t row
  * @param A
  * @param B
  */
-void DSP_Matrix_MultiplyElems_f64(double* __restrict result,
-                                  const double* A,
-                                  const double* B,
-                                  size_t rows,
-                                  size_t cols);
+static inline void DSP_Matrix_MultiplyElems_f64(double* __restrict result,
+                                                const double* A,
+                                                const double* B,
+                                                size_t rows,
+                                                size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] = A[i] * B[i];
+    }
+}
 
 /**
  * @brief result = result .* A (Element-wise multiplication)
@@ -318,7 +443,13 @@ void DSP_Matrix_MultiplyElems_f64(double* __restrict result,
  * @param rows
  * @param cols
  */
-void DSP_Matrix_MultiplyElemsInplace_f64(double* __restrict result, const double* A, size_t rows, size_t cols);
+static inline void DSP_Matrix_MultiplyElemsInplace_f64(double* result, const double* A, size_t rows, size_t cols)
+{
+    for(size_t i = 0; i < rows * cols; i++)
+    {
+        result[i] *= A[i];
+    }
+}
 
 /**
  * @brief result = A^T

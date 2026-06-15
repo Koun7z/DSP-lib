@@ -5,69 +5,32 @@
 
 #define QT_90DEG_SINGULARITY_THRESHOLD 0.2
 
-void DSP_QT_Add_f64(DSP_Quaternion_f64* dst, const DSP_Quaternion_f64* q1, const DSP_Quaternion_f64* q2)
-{
-    dst->r = q1->r + q2->r;
-    dst->i = q1->i + q2->i;
-    dst->j = q1->j + q2->j;
-    dst->k = q1->k + q2->k;
-}
-
-void DSP_QT_Subtract_f64(DSP_Quaternion_f64* dst, const DSP_Quaternion_f64* q1, const DSP_Quaternion_f64* q2)
-{
-    dst->r = q1->r - q2->r;
-    dst->i = q1->i - q2->i;
-    dst->j = q1->j - q2->j;
-    dst->k = q1->k - q2->k;
-}
-
-void DSP_QT_Multiply_f64(DSP_Quaternion_f64* dst, const DSP_Quaternion_f64* q1, const DSP_Quaternion_f64* q2)
-{
-    const double a1 = q1->r;
-    const double b1 = q1->i;
-    const double c1 = q1->j;
-    const double d1 = q1->k;
-
-    const double a2 = q2->r;
-    const double b2 = q2->i;
-    const double c2 = q2->j;
-    const double d2 = q2->k;
-
-    dst->r = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2;
-    dst->i = a1 * b2 + b1 * a2 + c1 * d2 - d1 * c2;
-    dst->j = a1 * c2 - b1 * d2 + c1 * a2 + d1 * b2;
-    dst->k = a1 * d2 + b1 * c2 - c1 * b2 + d1 * a2;
-}
-
-void DSP_QT_Scale_f64(DSP_Quaternion_f64* dst, const DSP_Quaternion_f64* q, double s)
-{
-    dst->r = s * q->r;
-    dst->i = s * q->i;
-    dst->j = s * q->j;
-    dst->k = s * q->k;
-}
-
-void DSP_QT_Conjugate_f64(DSP_Quaternion_f64* dst, const DSP_Quaternion_f64* q)
-{
-    dst->r = q->r;
-    dst->i = -q->i;
-    dst->j = -q->j;
-    dst->k = -q->k;
-}
-
-void DSP_QT_Normalize_f64(DSP_Quaternion_f64* dst, const DSP_Quaternion_f64* q)
-{
-    const double norm = sqrt(q->r * q->r + q->i * q->i + q->j * q->j + q->k * q->k);
-
-    dst->r = q->r / norm;
-    dst->i = q->i / norm;
-    dst->j = q->j / norm;
-    dst->k = q->k / norm;
-}
-
 double DSP_QT_Norm_f64(const DSP_Quaternion_f64* q)
 {
     return sqrt(q->r * q->r + q->i * q->i + q->j * q->j + q->k * q->k);
+}
+
+double DSP_QT_Normalize_f64(DSP_Quaternion_f64* dst, const DSP_Quaternion_f64* q)
+{
+    const double sq_norm = q->r * q->r + q->i * q->i + q->j * q->j + q->k * q->k;
+
+    if(sq_norm < (DSP_NORM_EPSILON_F64 * DSP_NORM_EPSILON_F64))
+    {
+        dst->r = 0.0;
+        dst->i = 0.0;
+        dst->j = 0.0;
+        dst->k = 0.0;
+        return 0.0;
+    }
+    const double norm     = sqrt(sq_norm);
+    const double inv_norm = 1.0 / norm;
+
+    dst->r = q->r * inv_norm;
+    dst->i = q->i * inv_norm;
+    dst->j = q->j * inv_norm;
+    dst->k = q->k * inv_norm;
+
+    return norm;
 }
 
 void DSP_QT_RotateVector_f64(double* dst, const double* v, const DSP_Quaternion_f64* q)

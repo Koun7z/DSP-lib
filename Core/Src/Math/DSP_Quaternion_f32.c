@@ -9,63 +9,10 @@
 
 #define QT_90DEG_SINGULARITY_THRESHOLD 0.2f
 
-// TODO: Many of those should be inline
-
-void DSP_QT_Add_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q1, const DSP_Quaternion_f32* q2)
-{
-    dst->r = q1->r + q2->r;
-    dst->i = q1->i + q2->i;
-    dst->j = q1->j + q2->j;
-    dst->k = q1->k + q2->k;
-}
-
-void DSP_QT_Subtract_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q1, const DSP_Quaternion_f32* q2)
-{
-    dst->r = q1->r - q2->r;
-    dst->i = q1->i - q2->i;
-    dst->j = q1->j - q2->j;
-    dst->k = q1->k - q2->k;
-}
-
-void DSP_QT_Multiply_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q1, const DSP_Quaternion_f32* q2)
-{
-    const float a1 = q1->r;
-    const float b1 = q1->i;
-    const float c1 = q1->j;
-    const float d1 = q1->k;
-
-    const float a2 = q2->r;
-    const float b2 = q2->i;
-    const float c2 = q2->j;
-    const float d2 = q2->k;
-
-    dst->r = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2;
-    dst->i = a1 * b2 + b1 * a2 + c1 * d2 - d1 * c2;
-    dst->j = a1 * c2 - b1 * d2 + c1 * a2 + d1 * b2;
-    dst->k = a1 * d2 + b1 * c2 - c1 * b2 + d1 * a2;
-}
-
-void DSP_QT_Scale_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q, float s)
-{
-    dst->r = s * q->r;
-    dst->i = s * q->i;
-    dst->j = s * q->j;
-    dst->k = s * q->k;
-}
-
-void DSP_QT_Conjugate_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q)
-{
-    dst->r = q->r;
-    dst->i = -q->i;
-    dst->j = -q->j;
-    dst->k = -q->k;
-}
-
 float DSP_QT_Norm_f32(const DSP_Quaternion_f32* q)
 {
     return sqrtf(q->r * q->r + q->i * q->i + q->j * q->j + q->k * q->k);
 }
-
 
 float DSP_QT_Normalize_f32(DSP_Quaternion_f32* dst, const DSP_Quaternion_f32* q)
 {

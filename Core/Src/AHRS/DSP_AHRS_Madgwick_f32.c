@@ -1,20 +1,42 @@
 #include "DSP_AHRS_Madgwick.h"
+
 #include "DSP_Matrix.h"
 #include "DSP_Vector.h"
 
-int DSP_AHRS_Madgwick_Init_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta)
+#include "DSP_Assert.h"
+
+int DSP_AHRS_Madgwick_InitIMU_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta)
 {
     filter->_beta = beta;
+    filter->_zeta = 0.0f;
+    filter->_b[0] = 0.0f;
+    filter->_b[1] = 0.0f;
+    filter->_b[2] = 0.0f;
     return 0;
 }
 
-void DSP_AHRS_Madgwick_SetGain_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta)
+int DSP_AHRS_Madgwick_InitMARG_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta, float zeta)
 {
     filter->_beta = beta;
+    filter->_zeta = zeta;
+    filter->_b[0] = 0.0f;
+    filter->_b[1] = 0.0f;
+    filter->_b[2] = 0.0f;
+    return 0;
+}
+
+void DSP_AHRS_Madgwick_SetGain_f32(DSP_AHRS_Madgwick_Instance_f32* filter, float beta, float zeta)
+{
+    filter->_beta = beta;
+    filter->_zeta = zeta;
 }
 
 void DSP_AHRS_Madgwick_UpdateIMU_f32(DSP_AHRS_Madgwick_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt)
 {
+    DSP_ASSERT(filter && data);
+    DSP_ASSERT(dt > 0.0f);
+
+
     const float p = data->GyroData[0];
     const float q = data->GyroData[1];
     const float r = data->GyroData[2];
@@ -77,12 +99,20 @@ void DSP_AHRS_Madgwick_UpdateIMU_f32(DSP_AHRS_Madgwick_Instance_f32* filter, DSP
 
 void DSP_AHRS_Madgwick_UpdateMARG_f32(DSP_AHRS_Madgwick_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt)
 {
+    DSP_ASSERT(filter && data);
+    DSP_ASSERT(dt > 0.0f);
+
     const float p = data->GyroData[0];
     const float q = data->GyroData[1];
     const float r = data->GyroData[2];
 
     /* Integrating local angular velocity */
-    const DSP_Quaternion_f32 omega_l = {.r = 0.0f, .i = p, .j = q, .k = r};
+    const DSP_Quaternion_f32 omega_l = {
+        .r = 0.0f,
+        .i = p - filter->_b[0],
+        .j = q - filter->_b[1],
+        .k = r - filter->_b[2],
+    };
 
     DSP_Quaternion_f32 delta_q_gyro;
     DSP_QT_Multiply_f32(&delta_q_gyro, &data->AttitudeEstimate, &omega_l);
@@ -104,12 +134,18 @@ void DSP_AHRS_Madgwick_UpdateMARG_f32(DSP_AHRS_Madgwick_Instance_f32* filter, DS
     const float q_kk = q_k * q_k;
 
     float mag_data[3] = {data->MagData[0], data->MagData[1], data->MagData[2]};
-    const float m_i   = mag_data[0];
-    const float m_j   = mag_data[0];
-    const float m_k   = mag_data[0];
+    DSP_Vector_Normalize_f32(mag_data, 3);
+    const float m_i = mag_data[0];
+    const float m_j = mag_data[1];
+    const float m_k = mag_data[2];
 
-    const float b_i = data->MagRef[0];
-    const float b_k = data->MagRef[2];
+    DSP_QT_RotateVector_f32(mag_data, mag_data, &data->AttitudeEstimate);
+    const float h_i = mag_data[0];
+    const float h_j = mag_data[1];
+    const float h_k = mag_data[2];
+
+    const float b_i = sqrtf(h_i * h_i + h_j * h_j);
+    const float b_k = h_k;
 
     // clang-format off
     float f_gb[6] = {
@@ -144,14 +180,21 @@ void DSP_AHRS_Madgwick_UpdateMARG_f32(DSP_AHRS_Madgwick_Instance_f32* filter, DS
     };
     // clang-format on
 
-    float grad[4];
-    DSP_Matrix_Multiply_f32(grad, J_gbT, 4, 6, f_gb, 1);
+    DSP_Quaternion_f32 grad;
+    DSP_Matrix_Multiply_f32(grad.q, J_gbT, 4, 6, f_gb, 1);
+    DSP_QT_Normalize_f32(&grad, &grad);
 
-    DSP_Vector_Normalize_f32(grad, 4);
-    data->AttitudeEstimate.r += (delta_q_gyro.r - filter->_beta * grad[0]) * dt;
-    data->AttitudeEstimate.i += (delta_q_gyro.i - filter->_beta * grad[1]) * dt;
-    data->AttitudeEstimate.j += (delta_q_gyro.j - filter->_beta * grad[2]) * dt;
-    data->AttitudeEstimate.k += (delta_q_gyro.k - filter->_beta * grad[3]) * dt;
+    DSP_Quaternion_f32 omega_eps;
+    DSP_QT_Multiply_f32(&omega_eps, &data->AttitudeEstimate, &grad);
+    filter->_b[0] += 2.0f * filter->_zeta * omega_eps.i * dt;
+    filter->_b[1] += 2.0f * filter->_zeta * omega_eps.j * dt;
+    filter->_b[2] += 2.0f * filter->_zeta * omega_eps.k * dt;
+
+
+    data->AttitudeEstimate.r += (delta_q_gyro.r - filter->_beta * grad.r) * dt;
+    data->AttitudeEstimate.i += (delta_q_gyro.i - filter->_beta * grad.i) * dt;
+    data->AttitudeEstimate.j += (delta_q_gyro.j - filter->_beta * grad.j) * dt;
+    data->AttitudeEstimate.k += (delta_q_gyro.k - filter->_beta * grad.k) * dt;
 
     DSP_QT_Normalize_f32(&data->AttitudeEstimate, &data->AttitudeEstimate);
 }

@@ -8,6 +8,9 @@ typedef struct
     float Kp;
     float Ki;
 
+    float AccCutoffLow;
+    float AccCutoffHigh;
+
     float _k_a;
     float _k_m;
 
@@ -17,6 +20,8 @@ typedef struct
 int DSP_AHRS_Mahony_Init_f32(DSP_AHRS_Mahony_Instance_f32* filter, float kp, float ki);
 
 void DSP_AHRS_Mahony_SetGain_f32(DSP_AHRS_Mahony_Instance_f32* filter, float kp, float ki);
+
+void DSP_AHRS_Mahony_SetAccCutoff_f32(DSP_AHRS_Mahony_Instance_f32* filter, float cutoffLow, float cutoffHigh);
 
 void DSP_AHRS_Mahony_SetMagAccRatio_f32(DSP_AHRS_Mahony_Instance_f32* filter, float magAccRatio);
 

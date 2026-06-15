@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 set(SRC_F32
     ${SRC_DIR}/AHRS/DSP_AHRS_Data.c
-    ${SRC_DIR}/AHRS/DSP_AHRS_NC_f32.c
+    ${SRC_DIR}/AHRS/DSP_AHRS_AQUA_f32.c
     ${SRC_DIR}/AHRS/DSP_AHRS_EKF_f32.c
     ${SRC_DIR}/AHRS/DSP_AHRS_Madgwick_f32.c
     ${SRC_DIR}/AHRS/DSP_AHRS_Mahony_f32.c

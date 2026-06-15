@@ -1,10 +1,18 @@
 #include "DSP_AHRS_Mahony.h"
+
+#include "DSP_AHRS_Common.h"
 #include "DSP_Vector.h"
+#include "DSP_Assert.h"
+
+#include <float.h>
 
 int DSP_AHRS_Mahony_Init_f32(DSP_AHRS_Mahony_Instance_f32* filter, float kp, float ki)
 {
     filter->Kp = kp;
     filter->Ki = ki;
+
+    filter->AccCutoffLow  = FLT_MAX;
+    filter->AccCutoffHigh = FLT_MAX;
 
     /* 0.5 by default, ignored for UpdateIMU */
     DSP_AHRS_Mahony_SetMagAccRatio_f32(filter, 0.5f);
@@ -20,6 +28,12 @@ void DSP_AHRS_Mahony_SetGain_f32(DSP_AHRS_Mahony_Instance_f32* filter, float kp,
 {
     filter->Kp = kp;
     filter->Ki = ki;
+}
+
+void DSP_AHRS_Mahony_SetAccCutoff_f32(DSP_AHRS_Mahony_Instance_f32* filter, float cutoffLow, float cutoffHigh)
+{
+    filter->AccCutoffLow  = cutoffLow;
+    filter->AccCutoffHigh = cutoffHigh;
 }
 
 void DSP_AHRS_Mahony_SetMagAccRatio_f32(DSP_AHRS_Mahony_Instance_f32* filter, float magAccRatio)
@@ -43,30 +57,37 @@ void DSP_AHRS_Mahony_SetMagAccRatio_f32(DSP_AHRS_Mahony_Instance_f32* filter, fl
 
 void DSP_AHRS_Mahony_UpdateIMU_f32(DSP_AHRS_Mahony_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt)
 {
+    DSP_ASSERT(filter && data);
+    DSP_ASSERT(dt > 0.0f);
+
     const float p = data->GyroData[0];
     const float q = data->GyroData[1];
     const float r = data->GyroData[2];
 
-    float omega_m[3] = {0.0f, 0.0f, 0.0f};
 
-    float acc_data[3] = {data->AccData[0], data->AccData[1], data->AccData[2]};
-    DSP_Vector_Normalize_f32(acc_data, 3);
-    const float a_i = acc_data[0];
-    const float a_j = acc_data[1];
-    const float a_k = acc_data[2];
+    float acc_data[3]    = {data->AccData[0], data->AccData[1], data->AccData[2]};
+    const float acc_norm = DSP_Vector_Normalize_f32(acc_data, 3);
+    const float a_i      = acc_data[0];
+    const float a_j      = acc_data[1];
+    const float a_k      = acc_data[2];
 
     float g_pred[3] = {0.0f, 0.0f, 1.0f};
     DSP_QT_RotateVectorInv_f32(g_pred, g_pred, &data->AttitudeEstimate);
 
-    /* Cross product between measured and predicted gravity vector */
-    omega_m[0] += (a_j * g_pred[2] - a_k * g_pred[1]);
-    omega_m[1] += (a_k * g_pred[0] - a_i * g_pred[2]);
-    omega_m[2] += (a_i * g_pred[1] - a_j * g_pred[0]);
+    const float kp_acc = DSP_AHRS_GainFactor_f32(acc_norm, filter->AccCutoffLow, filter->AccCutoffHigh);
 
-    DSP_Quaternion_f32 omega = {.r = 0.0f,
-                                .i = p + filter->Kp * omega_m[0] + filter->_b[0],
-                                .j = q + filter->Kp * omega_m[1] + filter->_b[1],
-                                .k = r + filter->Kp * omega_m[2] + filter->_b[2]};
+    /* Cross product between measured and predicted gravity vector */
+    float omega_m[3];
+    omega_m[0] = kp_acc * (a_j * g_pred[2] - a_k * g_pred[1]);
+    omega_m[1] = kp_acc * (a_k * g_pred[0] - a_i * g_pred[2]);
+    omega_m[2] = kp_acc * (a_i * g_pred[1] - a_j * g_pred[0]);
+
+    DSP_Quaternion_f32 omega = {
+        .r = 0.0f,
+        .i = p + filter->Kp * omega_m[0] - filter->_b[0],
+        .j = q + filter->Kp * omega_m[1] - filter->_b[1],
+        .k = r + filter->Kp * omega_m[2] /* + filter->_b[2] */,
+    };
 
     // q_{k + 1} = q{k} + 0.5*q{k}*omega*dt
     DSP_Quaternion_f32 delta_q;
@@ -76,35 +97,20 @@ void DSP_AHRS_Mahony_UpdateIMU_f32(DSP_AHRS_Mahony_Instance_f32* filter, DSP_AHR
     DSP_QT_Add_f32(&data->AttitudeEstimate, &data->AttitudeEstimate, &delta_q);
     DSP_QT_Normalize_f32(&data->AttitudeEstimate, &data->AttitudeEstimate);
 
-    filter->_b[0] += filter->Ki * omega_m[0] * dt;
-    filter->_b[1] += filter->Ki * omega_m[1] * dt;
-    filter->_b[2] += filter->Ki * omega_m[2] * dt;
+    filter->_b[0] -= filter->Ki * omega_m[0] * dt;
+    filter->_b[1] -= filter->Ki * omega_m[1] * dt;
+    // Yaw unobservable from IMU only
+    // filter->_b[2] += filter->Ki * omega_m[2] * dt;
 }
 
 void DSP_AHRS_Mahony_UpdateMARG_f32(DSP_AHRS_Mahony_Instance_f32* filter, DSP_AHRS_DataInstance_f32* data, float dt)
 {
+    DSP_ASSERT(filter && data);
+    DSP_ASSERT(dt > 0.0f);
+
     const float p = data->GyroData[0];
     const float q = data->GyroData[1];
     const float r = data->GyroData[2];
-
-    float omega_m[3] = {0.0f, 0.0f, 0.0f};
-    if(filter->_k_a != 0.0f)
-    {
-        float acc_data[3] = {data->AccData[0], data->AccData[1], data->AccData[2]};
-        DSP_Vector_Normalize_f32(acc_data, 3);
-        const float a_i = acc_data[0];
-        const float a_j = acc_data[1];
-        const float a_k = acc_data[2];
-
-
-        float g_pred[3] = {0.0f, 0.0f, 1.0f};
-        DSP_QT_RotateVectorInv_f32(g_pred, g_pred, &data->AttitudeEstimate);
-
-        // Cross product between measured and predicted gravity vector
-        omega_m[0] += filter->_k_a * (a_j * g_pred[2] - a_k * g_pred[1]);
-        omega_m[1] += filter->_k_a * (a_k * g_pred[0] - a_i * g_pred[2]);
-        omega_m[2] += filter->_k_a * (a_i * g_pred[1] - a_j * g_pred[0]);
-    }
 
     float mag_data[3] = {data->MagData[0], data->MagData[1], data->MagData[2]};
     DSP_Vector_Normalize_f32(mag_data, 3);
@@ -116,14 +122,35 @@ void DSP_AHRS_Mahony_UpdateMARG_f32(DSP_AHRS_Mahony_Instance_f32* filter, DSP_AH
     DSP_QT_RotateVectorInv_f32(b_pred, b_pred, &data->AttitudeEstimate);
 
     // Cross product between measured and predicted magnetic vector
-    omega_m[0] += filter->_k_m * (b_j * b_pred[2] - b_k * b_pred[1]);
-    omega_m[1] += filter->_k_m * (b_k * b_pred[0] - b_i * b_pred[2]);
-    omega_m[2] += filter->_k_m * (b_i * b_pred[1] - b_j * b_pred[0]);
+    float omega_m[3];
+    omega_m[0] = filter->_k_m * (b_j * b_pred[2] - b_k * b_pred[1]);
+    omega_m[1] = filter->_k_m * (b_k * b_pred[0] - b_i * b_pred[2]);
+    omega_m[2] = filter->_k_m * (b_i * b_pred[1] - b_j * b_pred[0]);
+
+    if(filter->_k_a != 0.0f)
+    {
+        float acc_data[3]    = {data->AccData[0], data->AccData[1], data->AccData[2]};
+        const float acc_norm = DSP_Vector_Normalize_f32(acc_data, 3);
+        const float a_i      = acc_data[0];
+        const float a_j      = acc_data[1];
+        const float a_k      = acc_data[2];
+
+        const float kp_acc = filter->_k_a
+                           * DSP_AHRS_GainFactor_f32(acc_norm, filter->AccCutoffLow, filter->AccCutoffHigh);
+
+        float g_pred[3] = {0.0f, 0.0f, 1.0f};
+        DSP_QT_RotateVectorInv_f32(g_pred, g_pred, &data->AttitudeEstimate);
+
+        // Cross product between measured and predicted gravity vector
+        omega_m[0] += kp_acc * (a_j * g_pred[2] - a_k * g_pred[1]);
+        omega_m[1] += kp_acc * (a_k * g_pred[0] - a_i * g_pred[2]);
+        omega_m[2] += kp_acc * (a_i * g_pred[1] - a_j * g_pred[0]);
+    }
 
     DSP_Quaternion_f32 omega = {.r = 0.0f,
-                                .i = p + filter->Kp * omega_m[0] + filter->_b[0],
-                                .j = q + filter->Kp * omega_m[1] + filter->_b[1],
-                                .k = r + filter->Kp * omega_m[2] + filter->_b[2]};
+                                .i = p + filter->Kp * omega_m[0] - filter->_b[0],
+                                .j = q + filter->Kp * omega_m[1] - filter->_b[1],
+                                .k = r + filter->Kp * omega_m[2] - filter->_b[2]};
 
     // q_{k + 1} = q{k} + 0.5*q{k}*omega*dt
     DSP_Quaternion_f32 delta_q;
@@ -133,7 +160,7 @@ void DSP_AHRS_Mahony_UpdateMARG_f32(DSP_AHRS_Mahony_Instance_f32* filter, DSP_AH
     DSP_QT_Add_f32(&data->AttitudeEstimate, &data->AttitudeEstimate, &delta_q);
     DSP_QT_Normalize_f32(&data->AttitudeEstimate, &data->AttitudeEstimate);
 
-    filter->_b[0] += filter->Ki * omega_m[0] * dt;
-    filter->_b[1] += filter->Ki * omega_m[1] * dt;
-    filter->_b[2] += filter->Ki * omega_m[2] * dt;
+    filter->_b[0] -= filter->Ki * omega_m[0] * dt;
+    filter->_b[1] -= filter->Ki * omega_m[1] * dt;
+    filter->_b[2] -= filter->Ki * omega_m[2] * dt;
 }

@@ -3,37 +3,6 @@
 #include <string.h>
 #include <math.h>
 
-void DSP_Matrix_Add_f64(double* __restrict result, const double* A, const double* B, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] = A[i] + B[i];
-    }
-}
-
-void DSP_Matrix_AddInplace_f64(double* __restrict result, const double* A, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] += A[i];
-    }
-}
-
-void DSP_Matrix_Subtract_f64(double* __restrict result, const double* A, const double* B, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] = A[i] - B[i];
-    }
-}
-void DSP_Matrix_SubtractInplace_f64(double* result, const double* A, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] -= A[i];
-    }
-}
-
 void DSP_Matrix_Multiply_f64(double* __restrict result,
                              const double* A,
                              size_t rowsA,
@@ -78,38 +47,6 @@ void DSP_Matrix_SandwichMultiply_f64(double* __restrict result, const double* A,
 
             result[i * M + j] = sum_ij;
         }
-    }
-}
-
-void DSP_Matrix_Scale_f64(double* __restrict result, const double* A, double s, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] = A[i] * s;
-    }
-}
-
-void DSP_Matrix_ScaleInplace_f64(double* result, double s, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] *= s;
-    }
-}
-
-void DSP_Matrix_MultiplyElems_f64(double* __restrict result, const double* A, const double* B, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] = A[i] * B[i];
-    }
-}
-
-void DSP_Matrix_MultiplyElemsInplace_f64(double* result, const double* A, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] *= A[i];
     }
 }
 

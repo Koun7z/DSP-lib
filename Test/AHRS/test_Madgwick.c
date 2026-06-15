@@ -28,7 +28,7 @@ START_TEST(synth_data)
     }
 
     DSP_AHRS_Madgwick_Instance_f32 madgwick_filter;
-    DSP_AHRS_Madgwick_Init_f32(&madgwick_filter, 0.1f);
+    DSP_AHRS_Madgwick_InitIMU_f32(&madgwick_filter, 0.1f);
 
     DSP_AHRS_DataInstance_f32 data;
     DSP_AHRS_DataInit_f32(&data);
@@ -90,7 +90,7 @@ START_TEST(RepoIMU_data)
     }
 
     DSP_AHRS_Madgwick_Instance_f32 madgwick_filter;
-    DSP_AHRS_Madgwick_Init_f32(&madgwick_filter, 0.1f);
+    DSP_AHRS_Madgwick_InitIMU_f32(&madgwick_filter, 0.1f);
 
     DSP_AHRS_DataInstance_f32 data;
     DSP_AHRS_DataInit_f32(&data);

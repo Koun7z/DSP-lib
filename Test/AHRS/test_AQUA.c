@@ -1,4 +1,4 @@
-#include "DSP_AHRS_NC.h"
+#include "DSP_AHRS_AQUA.h"
 
 #include "test_registry.h"
 #include "AHRS_TestUtils.h"
@@ -27,8 +27,8 @@ START_TEST(test_data)
         ck_abort_msg("Failed to load test data");
     }
 
-    DSP_AHRS_NC_Instance_f32 nc_filter;
-    DSP_AHRS_NC_InitIMU_f32(&nc_filter, 0.1f, 0.95f, -1.0f, -1.0f);
+    DSP_AHRS_AQUA_Instance_f32 nc_filter;
+    DSP_AHRS_AQUA_InitIMU_f32(&nc_filter, 0.1f);
 
     DSP_AHRS_DataInstance_f32 data;
     DSP_AHRS_DataInit_f32(&data);
@@ -52,7 +52,7 @@ START_TEST(test_data)
         data.AccData[1] = test_data[i].AccData[1];
         data.AccData[2] = test_data[i].AccData[2];
 
-        DSP_AHRS_NC_UpdateIMU_f32(&nc_filter, &data, 0.01f);
+        DSP_AHRS_AQUA_UpdateIMU_f32(&nc_filter, &data, 0.01f);
         fprintf(fw, "%f,%f,%f,%f\n", data.AttitudeEstimate.r, data.AttitudeEstimate.i, data.AttitudeEstimate.j,
                 data.AttitudeEstimate.k);
 
@@ -93,8 +93,8 @@ START_TEST(RepoIMU_data)
         ck_abort_msg("Failed to load test data");
     }
 
-    DSP_AHRS_NC_Instance_f32 nc_filter;
-    DSP_AHRS_NC_InitIMU_f32(&nc_filter, 0.1f, 0.95f, -1.0f, -1.0f);
+    DSP_AHRS_AQUA_Instance_f32 nc_filter;
+    DSP_AHRS_AQUA_InitIMU_f32(&nc_filter, 0.1f);
 
     DSP_AHRS_DataInstance_f32 data;
     DSP_AHRS_DataInit_f32(&data);
@@ -117,7 +117,7 @@ START_TEST(RepoIMU_data)
         data.AccData[1] = test_data[i].AccData[1];
         data.AccData[2] = test_data[i].AccData[2];
 
-        DSP_AHRS_NC_UpdateIMU_f32(&nc_filter, &data, 0.01f);
+        DSP_AHRS_AQUA_UpdateIMU_f32(&nc_filter, &data, 0.01f);
         fprintf(fw, "%f,%f,%f,%f\n", data.AttitudeEstimate.r, data.AttitudeEstimate.i, data.AttitudeEstimate.j,
                 data.AttitudeEstimate.k);
     }

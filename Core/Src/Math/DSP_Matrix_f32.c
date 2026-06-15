@@ -3,37 +3,6 @@
 #include <string.h>
 #include <math.h>
 
-void DSP_Matrix_Add_f32(float* __restrict result, const float* A, const float* B, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] = A[i] + B[i];
-    }
-}
-
-void DSP_Matrix_AddInplace_f32(float* __restrict result, const float* A, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] += A[i];
-    }
-}
-
-void DSP_Matrix_Subtract_f32(float* __restrict result, const float* A, const float* B, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] = A[i] - B[i];
-    }
-}
-void DSP_Matrix_SubtractInplace_f32(float* result, const float* A, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] -= A[i];
-    }
-}
-
 void DSP_Matrix_Multiply_f32(float* __restrict result,
                              const float* A,
                              size_t rowsA,
@@ -41,79 +10,65 @@ void DSP_Matrix_Multiply_f32(float* __restrict result,
                              const float* B,
                              size_t colsB)
 {
+    memset(result, 0.0f, rowsA * colsB * sizeof(float));
+
     for(size_t i = 0; i < rowsA; i++)
     {
-        for(size_t j = 0; j < colsB; j++)
+        for(size_t k = 0; k < colsA; k++)
         {
-            float sum = 0.0f;
-
-            for(size_t k = 0; k < colsA; k++)
+            for(size_t j = 0; j < colsB; j++)
             {
-                sum += A[i * colsA + k] * B[k * colsB + j];
+                result[i * colsB + j] += A[i * colsA + k] * B[k * colsB + j];
             }
-
-            result[i * colsB + j] = sum;
         }
     }
 }
 
-void DSP_Matrix_SandwichMultiply_f32(float* __restrict result, const float* A, const float* B, size_t M, size_t N)
+// TODO: bench this one on STM32 as well
+void DSP_Matrix_SandwichMultiply_f32(float* __restrict result,
+                                     const float* __restrict A,
+                                     const float* __restrict B,
+                                     size_t M,
+                                     size_t N)
 {
+    memset(result, 0, M * M * sizeof(float));
+
+#define KB 8  // tune for your CPU
+
     for(size_t i = 0; i < M; i++)
     {
-        for(size_t j = 0; j < M; j++)
+        const float* Ai = &A[i * N];
+
+        for(size_t kk = 0; kk < N; kk += KB)
         {
-            float sum_ij = 0.0f;
+            float AB[KB] = {0};
 
-            for(size_t k = 0; k < N; k++)
+            for(size_t t = 0; t < N; t++)
             {
-                float AB_ik = 0.0f;
-                for(size_t t = 0; t < N; t++)
-                {
-                    AB_ik += A[i * N + t] * B[t * N + k];
-                }
+                float a_it      = Ai[t];
+                const float* Bt = &B[t * N + kk];
 
-                sum_ij += AB_ik * A[j * N + k];
+                for(size_t u = 0; u < KB && (kk + u) < N; u++)
+                {
+                    AB[u] += a_it * Bt[u];
+                }
             }
 
-            result[i * M + j] = sum_ij;
+            for(size_t j = 0; j < M; j++)
+            {
+                float* rij      = &result[i * M + j];
+                const float* Aj = &A[j * N + kk];
+
+                for(size_t u = 0; u < KB && (kk + u) < N; u++)
+                {
+                    *rij += AB[u] * Aj[u];
+                }
+            }
         }
     }
 }
 
-void DSP_Matrix_Scale_f32(float* __restrict result, const float* A, float s, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] = A[i] * s;
-    }
-}
-
-void DSP_Matrix_ScaleInplace_f32(float* result, float s, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] *= s;
-    }
-}
-
-void DSP_Matrix_MultiplyElems_f32(float* __restrict result, const float* A, const float* B, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] = A[i] * B[i];
-    }
-}
-
-void DSP_Matrix_MultiplyElemsInplace_f32(float* result, const float* A, size_t rows, size_t cols)
-{
-    for(size_t i = 0; i < rows * cols; i++)
-    {
-        result[i] *= A[i];
-    }
-}
-
-void DSP_Matrix_Transpose_f32(float* __restrict result, const float* M, size_t rows, size_t cols)
+void DSP_Matrix_Transpose_f32(float* __restrict result, const float* __restrict M, size_t rows, size_t cols)
 {
     for(size_t i = 0; i < rows; i++)
     {

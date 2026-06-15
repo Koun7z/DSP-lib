@@ -63,7 +63,7 @@ add_dsp_test(test_control
 )
 
 add_dsp_test(test_ahrs
-    ${TEST_DIR}/AHRS/test_NC.c
+    ${TEST_DIR}/AHRS/test_AQUA.c
     ${TEST_DIR}/AHRS/test_EKF.c
     ${TEST_DIR}/AHRS/test_Mahony.c
     ${TEST_DIR}/AHRS/test_Madgwick.c
@@ -88,7 +88,7 @@ target_compile_options(dsp-bench PRIVATE
     ${CHECK_CFLAGS_OTHER}
     -Wall -Wextra
     $<$<CONFIG:Debug>:-O0 -g>
-    $<$<CONFIG:Release>:-O3>
+    $<$<CONFIG:Release>:-O3 -DNDEBUG >
 )
 
 target_link_libraries(dsp-bench PRIVATE
